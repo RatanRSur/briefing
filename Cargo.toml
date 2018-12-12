@@ -1,0 +1,7 @@
+[package]
+name = "briefing"
+version = "0.1.0"
+authors = ["Ratan Rai Sur <ratan.r.sur@gmail.com>"]
+edition = "2018"
+
+[dependencies]
