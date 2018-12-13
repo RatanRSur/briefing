@@ -1,6 +1,8 @@
 use std::io::{self, BufReader};
 use std::io::prelude::*;
 use std::fs::File;
+use std::process::Command;
+use std::env;
 
 use regex::Regex;
 use chrono::naive::NaiveDateTime;
@@ -32,9 +34,17 @@ fn main() -> io::Result<()> {
         r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> ((.+))\)$"
     ).unwrap();
 
-    f.lines()
-        .filter_map(|result_str| result_str.map(|s| extract_data(&s, &regex)).unwrap())
-        .for_each(|e| println!("{:?}", e));
+    let upgrades = f.lines()
+        .filter_map(|result_str| result_str.map(|s| extract_data(&s, &regex)).unwrap());
+
+    let installed_packages_output = String::from_utf8(Command::new("/usr/bin/pacman")
+                                                .arg("-Qqe")
+                                                .output()
+                                                .expect("failed to execute process")
+                                                .stdout)
+                                    .unwrap();
+
+    let installed_packages = installed_packages_output.split_whitespace();
 
     Ok(())
 }
