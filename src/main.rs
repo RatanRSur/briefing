@@ -27,6 +27,9 @@ fn extract_data(s: &str, regex: &Regex) -> Option<Upgrade> {
 }
 
 fn main() -> io::Result<()> {
+    let last_briefing =
+        NaiveDateTime::parse_from_str("2018-12-01 00:00", "%Y-%m-%d %H:%M").unwrap();
+
     let f = BufReader::new(File::open("/var/log/pacman.log")?);
 
     let regex = Regex::new(
@@ -34,7 +37,9 @@ fn main() -> io::Result<()> {
     ).unwrap();
 
     let upgrades = f.lines()
-        .filter_map(|result_str| result_str.map(|s| extract_data(&s, &regex)).unwrap());
+        .filter_map(|result_str| result_str.map(|s| extract_data(&s, &regex)).unwrap())
+        .skip_while(|upgrade| last_briefing < upgrade.timestamp);
+
 
     let installed_packages_output = String::from_utf8(Command::new("/usr/bin/pacman")
                                                 .arg("-Qqe")
