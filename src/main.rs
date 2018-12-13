@@ -2,7 +2,6 @@ use std::io::{self, BufReader};
 use std::io::prelude::*;
 use std::fs::File;
 use std::process::Command;
-use std::env;
 
 use regex::Regex;
 use chrono::naive::NaiveDateTime;
