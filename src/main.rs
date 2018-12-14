@@ -31,7 +31,9 @@ fn main() -> io::Result<()> {
 
     let installed_packages_output = String::from_utf8(
         Command::new("/usr/bin/pacman")
-            .arg("-Qqe")
+            .arg("--query")
+            .arg("--quiet")
+            .arg("--explicit")
             .output()
             .expect("failed to execute process")
             .stdout,
@@ -58,7 +60,8 @@ fn main() -> io::Result<()> {
 
     let upgraded_package_urls = String::from_utf8(
         Command::new("/usr/bin/pacman")
-            .arg("-Qi")
+            .arg("--query")
+            .arg("--info")
             .args(upgraded_packages)
             .output()
             .expect("failed to execute process")
