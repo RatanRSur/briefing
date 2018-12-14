@@ -18,9 +18,9 @@ fn extract_data(s: &str, regex: &Regex) -> Option<Upgrade> {
     let maybe_line_captures = regex.captures(s);
     maybe_line_captures.map(|caps| {
         Upgrade { timestamp:    NaiveDateTime::parse_from_str(&caps[1], "%Y-%m-%d %H:%M").unwrap(),
-                  package_name: caps[3].to_string(),
-                  old_version:  caps[4].to_string(),
-                  new_version:  caps[5].to_string()
+                  package_name: caps[2].to_string(),
+                  old_version:  caps[3].to_string(),
+                  new_version:  caps[4].to_string()
         }
     })
 }
