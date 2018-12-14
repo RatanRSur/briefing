@@ -60,13 +60,13 @@ fn main() -> io::Result<()> {
 
     let upgraded_package_urls: Vec<String> = {
         let command_output = String::from_utf8(
-        Command::new("/usr/bin/pacman")
-            .arg("--query")
-            .arg("--info")
-            .args(upgraded_packages)
-            .output()
-            .expect("failed to execute process")
-            .stdout,
+            Command::new("/usr/bin/pacman")
+                .arg("--query")
+                .arg("--info")
+                .args(upgraded_packages)
+                .output()
+                .expect("failed to execute process")
+                .stdout,
         )
         .unwrap();
 
