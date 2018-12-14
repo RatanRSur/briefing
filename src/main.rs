@@ -63,7 +63,7 @@ fn main() -> io::Result<()> {
             Command::new("/usr/bin/pacman")
                 .arg("--query")
                 .arg("--info")
-                .args(upgraded_packages)
+                .args(&upgraded_packages)
                 .output()
                 .expect("failed to execute process")
                 .stdout,
