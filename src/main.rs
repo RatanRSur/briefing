@@ -55,7 +55,7 @@ fn main() -> io::Result<()> {
             .skip_while(|upgrade| upgrade.timestamp < last_briefing)
             .filter(|upgrade| installed_packages.contains(&upgrade.package_name.as_ref()))
             .map(|upgrade| upgrade.package_name)
-            .collect::<HashSet<String>>()
+            .collect::<Vec<String>>()
     };
 
     let upgraded_package_urls: Vec<String> = {
