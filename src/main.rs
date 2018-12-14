@@ -2,6 +2,7 @@ use std::io::{self, BufReader};
 use std::io::prelude::*;
 use std::fs::File;
 use std::process::Command;
+use std::collections::HashSet;
 
 use regex::Regex;
 use chrono::naive::NaiveDateTime;
@@ -36,6 +37,8 @@ fn main() -> io::Result<()> {
                                                         .stdout)
                                                 .unwrap();
 
+    let installed_packages: Vec<&str> = installed_packages_output.split_whitespace().collect();
+
     let f = BufReader::new(File::open("/var/log/pacman.log")?);
 
     let regex = Regex::new(
@@ -44,17 +47,12 @@ fn main() -> io::Result<()> {
 
     let upgrades = f.lines()
         .filter_map(|result_str| result_str.map(|s| extract_data(&s, &regex)).unwrap())
-        .skip_while(|upgrade| last_briefing < upgrade.timestamp);
+        .skip_while(|upgrade| last_briefing < upgrade.timestamp)
+        .filter(|upgrade| installed_packages.contains(&upgrade.package_name.as_ref()))
+        .map(|upgrade| upgrade.package_name)
+        .collect::<HashSet<String>>();
 
-
-    let installed_packages_output = String::from_utf8(Command::new("/usr/bin/pacman")
-                                                .arg("-Qqe")
-                                                .output()
-                                                .expect("failed to execute process")
-                                                .stdout)
-                                    .unwrap();
-
-    let installed_packages = installed_packages_output.split_whitespace();
+    upgrades.into_iter().for_each(|u| println!("{:?}", u));
 
     Ok(())
 }
