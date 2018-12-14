@@ -47,7 +47,7 @@ fn main() -> io::Result<()> {
     )
     .unwrap();
 
-    let upgrades = f
+    let upgraded_packages = f
         .lines()
         .filter_map(|result_str| result_str.map(|s| extract_data(&s, &regex)).unwrap())
         .skip_while(|upgrade| upgrade.timestamp < last_briefing)
@@ -55,7 +55,17 @@ fn main() -> io::Result<()> {
         .map(|upgrade| upgrade.package_name)
         .collect::<HashSet<String>>();
 
-    upgrades.into_iter().for_each(|u| println!("{:?}", u));
+    let upgraded_package_urls = String::from_utf8(
+        Command::new("/usr/bin/pacman")
+            .arg("-Qi")
+            .args(upgraded_packages)
+            .output()
+            .expect("failed to execute process")
+            .stdout,
+    )
+    .unwrap();
+
+    println!("{}", upgraded_package_urls);
 
     Ok(())
 }
