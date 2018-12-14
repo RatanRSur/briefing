@@ -38,7 +38,7 @@ fn main() -> io::Result<()> {
     )
     .unwrap();
 
-    let installed_packages: Vec<&str> = installed_packages_output.split_whitespace().collect();
+    let installed_packages: HashSet<&str> = installed_packages_output.split_whitespace().collect();
 
     let f = BufReader::new(File::open("/var/log/pacman.log")?);
 
