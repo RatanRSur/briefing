@@ -40,20 +40,21 @@ fn main() -> io::Result<()> {
 
     let installed_packages: HashSet<&str> = installed_packages_output.split_whitespace().collect();
 
-    let f = BufReader::new(File::open("/var/log/pacman.log")?);
+    let upgraded_packages = {
+        let f = BufReader::new(File::open("/var/log/pacman.log")?);
 
-    let regex = Regex::new(
-        r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> ((.+))\)$",
-    )
-    .unwrap();
+        let regex = Regex::new(
+            r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> ((.+))\)$",
+        )
+        .unwrap();
 
-    let upgraded_packages = f
-        .lines()
-        .filter_map(|result_str| result_str.map(|s| extract_data(&s, &regex)).unwrap())
-        .skip_while(|upgrade| upgrade.timestamp < last_briefing)
-        .filter(|upgrade| installed_packages.contains(&upgrade.package_name.as_ref()))
-        .map(|upgrade| upgrade.package_name)
-        .collect::<HashSet<String>>();
+        f.lines()
+            .filter_map(|result_str| result_str.map(|s| extract_data(&s, &regex)).unwrap())
+            .skip_while(|upgrade| upgrade.timestamp < last_briefing)
+            .filter(|upgrade| installed_packages.contains(&upgrade.package_name.as_ref()))
+            .map(|upgrade| upgrade.package_name)
+            .collect::<HashSet<String>>()
+    };
 
     let upgraded_package_urls = String::from_utf8(
         Command::new("/usr/bin/pacman")
