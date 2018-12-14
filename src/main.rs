@@ -58,7 +58,8 @@ fn main() -> io::Result<()> {
             .collect::<HashSet<String>>()
     };
 
-    let upgraded_package_urls = String::from_utf8(
+    let upgraded_package_urls: Vec<String> = {
+        let command_output = String::from_utf8(
         Command::new("/usr/bin/pacman")
             .arg("--query")
             .arg("--info")
@@ -66,10 +67,21 @@ fn main() -> io::Result<()> {
             .output()
             .expect("failed to execute process")
             .stdout,
-    )
-    .unwrap();
+        )
+        .unwrap();
 
-    println!("{}", upgraded_package_urls);
+        let regex = Regex::new(r"\nURL *: (.*)\n").unwrap();
+
+        regex
+            .captures_iter(&command_output)
+            .map(|captures| String::from(&captures[1]))
+            .collect()
+    };
+
+    //println!("{}", upgraded_package_urls);
+    for url in upgraded_package_urls {
+        println!("{}", url);
+    }
 
     Ok(())
 }
