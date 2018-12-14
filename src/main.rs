@@ -51,7 +51,7 @@ fn main() -> io::Result<()> {
         .unwrap();
 
         f.lines()
-            .filter_map(|result_str| result_str.map(|s| extract_data(&s, &regex)).unwrap())
+            .filter_map(|result_str| result_str.ok().and_then(|s| extract_data(&s, &regex)))
             .skip_while(|upgrade| upgrade.timestamp < last_briefing)
             .filter(|upgrade| installed_packages.contains(&upgrade.package_name.as_ref()))
             .map(|upgrade| upgrade.package_name)
