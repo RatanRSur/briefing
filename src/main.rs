@@ -7,8 +7,10 @@ use std::process::Command;
 use chrono::naive::NaiveDateTime;
 use regex::Regex;
 
+mod url_formats;
+
 #[derive(Debug)]
-struct Upgrade {
+pub struct Upgrade {
     timestamp: NaiveDateTime,
     package_name: String,
     old_version: String,
@@ -46,7 +48,7 @@ fn main() -> io::Result<()> {
         let f = BufReader::new(File::open("/var/log/pacman.log")?);
 
         let regex = Regex::new(
-            r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> ((.+))\)$",
+            r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> ([^-]+)(-\d+)?\)$",
         )
         .unwrap();
 
@@ -54,8 +56,7 @@ fn main() -> io::Result<()> {
             .filter_map(|result_str| result_str.ok().and_then(|s| extract_data(&s, &regex)))
             .skip_while(|upgrade| upgrade.timestamp < last_briefing)
             .filter(|upgrade| installed_packages.contains(&upgrade.package_name.as_ref()))
-            .map(|upgrade| upgrade.package_name)
-            .collect::<Vec<String>>()
+            .collect::<Vec<Upgrade>>()
     };
 
     let upgraded_package_urls: Vec<String> = {
@@ -63,7 +64,12 @@ fn main() -> io::Result<()> {
             Command::new("/usr/bin/pacman")
                 .arg("--query")
                 .arg("--info")
-                .args(&upgraded_packages)
+                .args(
+                    &upgraded_packages
+                        .iter()
+                        .map(|upgrade| &upgrade.package_name)
+                        .collect::<Vec<&String>>(),
+                )
                 .output()
                 .expect("failed to execute process")
                 .stdout,
@@ -79,8 +85,12 @@ fn main() -> io::Result<()> {
     };
 
     //println!("{}", upgraded_package_urls);
-    for url in upgraded_package_urls {
-        println!("{}", url);
+    for (upgrade, _url) in upgraded_packages.iter().zip(upgraded_package_urls.iter()) {
+        println!(
+            "{}: {}",
+            upgrade.package_name,
+            url_formats::get_release_notes_url(&upgrade)
+        );
     }
 
     Ok(())
