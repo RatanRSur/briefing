@@ -82,7 +82,7 @@ fn main() -> io::Result<()> {
     let upgrades = {
         let f = BufReader::new(File::open("/var/log/pacman.log")?);
 
-        let regex = Regex::new(r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> ([^-]+)(-\d+)?\)$",) .unwrap();
+        let regex = Regex::new(r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> ([^-+]+).*\)$",).unwrap();
 
         let installed_package_names: HashSet<_> = installed_packages
             .iter()
