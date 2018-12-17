@@ -26,8 +26,8 @@ fn extract_upgrade(s: &str, regex: &Regex, packages: &HashMap<String, Package>) 
             timestamp: NaiveDateTime::parse_from_str(&caps[1], "%Y-%m-%d %H:%M").unwrap(),
             package: package.clone(),
             old_version: caps[3].to_string(),
-            new_version: caps[4].to_string(),
-            url: url_templates::format_url(&package.url_template, &caps[4].to_string()),
+            new_version: caps[5].to_string(),
+            url: url_templates::format_url(&package.url_template, &caps[5].to_string()),
         })
     })
 }
@@ -82,7 +82,7 @@ fn main() -> io::Result<()> {
     let upgrades = {
         let f = BufReader::new(File::open("/var/log/pacman.log")?);
 
-        let regex = Regex::new(r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> ([^-+]+).*\)$",).unwrap();
+        let regex = Regex::new(r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> (\d:)?([^-+]+).*\)$",).unwrap();
 
         let installed_package_names: HashSet<_> = installed_packages
             .iter()
