@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 use strfmt::strfmt;
 
-use crate::Upgrade;
-
 pub static RELEASE_NOTES_TEMPLATES: &'static [(&str, &str)] = &[
     (
         "alacritty",
