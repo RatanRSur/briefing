@@ -14,5 +14,5 @@ pub fn format_url(template: &String, version: &String) -> String {
         .cloned()
         .collect();
 
-    strfmt(template, &format_args).unwrap_or(String::from(""))
+    strfmt(template, &format_args).unwrap()
 }
