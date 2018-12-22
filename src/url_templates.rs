@@ -34,8 +34,8 @@ pub static RELEASE_NOTES_TEMPLATES: &'static [(&str, &str)] = &[
     ),
 ];
 
-pub fn format_url(template: &String, version: &String) -> String {
-    let format_args: HashMap<String, &String> = [(String::from("version"), version)]
+pub fn format_url(template: &str, version: &str) -> String {
+    let format_args: HashMap<String, &str> = [(String::from("version"), version)]
         .iter()
         .cloned()
         .collect();

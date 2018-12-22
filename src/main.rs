@@ -13,26 +13,18 @@ mod url_templates;
 #[derive(Debug)]
 pub struct Upgrade {
     timestamp: NaiveDateTime,
-    package: Package,
+    package_name: String,
     old_version: String,
     new_version: String,
-    url: String,
 }
 
-fn string_to_upgrade(
-    s: &str,
-    regex: &Regex,
-    packages: &HashMap<String, Package>,
-) -> Option<Upgrade> {
+fn string_to_upgrade(s: &str, regex: &Regex) -> Option<Upgrade> {
     let maybe_line_captures = regex.captures(s);
-    maybe_line_captures.and_then(|caps| {
-        packages.get(&caps[2].to_string()).map(|package| Upgrade {
-            timestamp: NaiveDateTime::parse_from_str(&caps[1], "%Y-%m-%d %H:%M").unwrap(),
-            package: package.clone(),
-            old_version: caps[3].to_string(),
-            new_version: caps[5].to_string(),
-            url: url_templates::format_url(&package.url_template, &caps[5].to_string()),
-        })
+    maybe_line_captures.map(|caps| Upgrade {
+        timestamp: NaiveDateTime::parse_from_str(&caps[1], "%Y-%m-%d %H:%M").unwrap(),
+        package_name: caps[2].to_string(),
+        old_version: caps[3].to_string(),
+        new_version: caps[5].to_string(),
     })
 }
 
@@ -83,7 +75,7 @@ fn main() -> io::Result<()> {
         packages
     };
 
-    let upgrades = {
+    let upgrades_by_name: HashMap<String, Vec<Upgrade>> = {
         let f = BufReader::new(File::open("/var/log/pacman.log")?);
 
         let regex = Regex::new(r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> (\d:)?([^-+]+).*\)$",).unwrap();
@@ -94,19 +86,38 @@ fn main() -> io::Result<()> {
             .cloned()
             .collect();
 
-        f.lines()
-            .filter_map(|result_str| {
-                result_str
-                    .ok()
-                    .and_then(|s| string_to_upgrade(&s, &regex, &installed_packages))
-            })
+        let mut accumulator: HashMap<String, Vec<Upgrade>> = HashMap::new();
+        let upgrades = f
+            .lines()
+            .filter_map(|result_str| result_str.ok().and_then(|s| string_to_upgrade(&s, &regex)))
             .skip_while(|upgrade| upgrade.timestamp < last_briefing)
-            .filter(|upgrade| installed_package_names.contains(&upgrade.package.name))
-            .collect::<Vec<Upgrade>>()
+            .filter(|upgrade| installed_package_names.contains(&upgrade.package_name));
+
+        for upgrade in upgrades {
+            let val = accumulator.get_mut(&upgrade.package_name);
+            match val {
+                Some(foo) => foo.push(upgrade),
+                None => {
+                    accumulator.insert(upgrade.package_name.clone(), vec![upgrade]);
+                    ()
+                }
+            }
+        }
+
+        accumulator
     };
 
-    for upgrade in upgrades {
-        println!("{}: {}", upgrade.package.name, upgrade.url);
+    for (package_name, upgrades) in upgrades_by_name {
+        let url_template = installed_packages
+            .get(&package_name)
+            .map(|package| &package.url_template)
+            .unwrap();
+        let versions = upgrades.iter().map(|upgrade| &upgrade.new_version);
+        println!("{}:", package_name);
+        for version in versions {
+            let url_formatted = url_templates::format_url(&url_template, &version);
+            println!("\t{}", url_formatted);
+        }
     }
 
     Ok(())
