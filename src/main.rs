@@ -1,9 +1,15 @@
+use lazy_static::lazy_static;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::error::Error;
+use std::fmt::Display;
+use std::fmt::Formatter;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader};
+use std::str::FromStr;
+
 use std::process::Command;
 
 use chrono::naive::NaiveDateTime;
@@ -19,14 +25,35 @@ pub struct Upgrade {
     new_version: String,
 }
 
-fn string_to_upgrade(s: &str, regex: &Regex) -> Option<Upgrade> {
-    let maybe_line_captures = regex.captures(s);
-    maybe_line_captures.map(|caps| Upgrade {
-        timestamp: NaiveDateTime::parse_from_str(&caps[1], "%Y-%m-%d %H:%M").unwrap(),
-        package_name: caps[2].to_string(),
-        old_version: caps[3].to_string(),
-        new_version: caps[5].to_string(),
-    })
+lazy_static! {
+    static ref upgrade_parse_regex: Regex = Regex::new(r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> (\d:)?([^-+]+).*\)$",).unwrap();
+}
+
+#[derive(Debug)]
+pub enum ParseUpgradeError {
+    Error,
+}
+impl Error for ParseUpgradeError {}
+impl Display for ParseUpgradeError {
+    fn fmt(&self, _f: &mut Formatter) -> std::fmt::Result {
+        Ok(())
+    }
+}
+
+impl FromStr for Upgrade {
+    type Err = ParseUpgradeError;
+
+    fn from_str(s: &str) -> Result<Upgrade, Self::Err> {
+        let maybe_line_captures = upgrade_parse_regex.captures(s);
+        maybe_line_captures
+            .map(|caps| Upgrade {
+                timestamp: NaiveDateTime::parse_from_str(&caps[1], "%Y-%m-%d %H:%M").unwrap(),
+                package_name: caps[2].to_string(),
+                old_version: caps[3].to_string(),
+                new_version: caps[5].to_string(),
+            })
+            .ok_or(ParseUpgradeError::Error)
+    }
 }
 
 #[derive(Debug, PartialEq, Hash, Eq, Clone)]
@@ -80,8 +107,6 @@ fn main() -> io::Result<()> {
     let upgrades_by_name = {
         let f = BufReader::new(File::open("/var/log/pacman.log")?);
 
-        let regex = Regex::new(r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> (\d:)?([^-+]+).*\)$",).unwrap();
-
         let installed_package_names: HashSet<_> = installed_packages
             .iter()
             .map(|name_and_package| name_and_package.0)
@@ -91,7 +116,7 @@ fn main() -> io::Result<()> {
         let mut accumulator: BTreeMap<String, Vec<Upgrade>> = BTreeMap::new();
         let upgrades = f
             .lines()
-            .filter_map(|result_str| result_str.ok().and_then(|s| string_to_upgrade(&s, &regex)))
+            .filter_map(|result_str| result_str.ok().and_then(|s| Upgrade::from_str(&s).ok()))
             .skip_while(|upgrade| upgrade.timestamp < last_briefing)
             .filter(|upgrade| installed_package_names.contains(&upgrade.package_name));
 
