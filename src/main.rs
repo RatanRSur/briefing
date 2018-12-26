@@ -96,14 +96,10 @@ fn main() -> io::Result<()> {
             .filter(|upgrade| installed_package_names.contains(&upgrade.package_name));
 
         for upgrade in upgrades {
-            let val = accumulator.get_mut(&upgrade.package_name);
-            match val {
-                Some(foo) => foo.push(upgrade),
-                None => {
-                    accumulator.insert(upgrade.package_name.clone(), vec![upgrade]);
-                    ()
-                }
-            }
+            let vec = accumulator
+                .entry(upgrade.package_name.clone())
+                .or_insert(Vec::new());
+            vec.push(upgrade);
         }
 
         accumulator
