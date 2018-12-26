@@ -25,10 +25,6 @@ pub struct Upgrade {
     new_version: String,
 }
 
-lazy_static! {
-    static ref upgrade_parse_regex: Regex = Regex::new(r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> (\d:)?([^-+]+).*\)$",).unwrap();
-}
-
 #[derive(Debug)]
 pub enum ParseUpgradeError {
     Error,
@@ -44,6 +40,10 @@ impl FromStr for Upgrade {
     type Err = ParseUpgradeError;
 
     fn from_str(s: &str) -> Result<Upgrade, Self::Err> {
+        lazy_static! {
+            static ref upgrade_parse_regex: Regex = Regex::new(r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> (\d:)?([^-+]+).*\)$",).unwrap();
+        }
+
         let maybe_line_captures = upgrade_parse_regex.captures(s);
         maybe_line_captures
             .map(|caps| Upgrade {
