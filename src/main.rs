@@ -31,17 +31,19 @@ fn string_to_upgrade(s: &str, regex: &Regex) -> Option<Upgrade> {
 #[derive(Debug, PartialEq, Hash, Eq, Clone)]
 struct Package {
     name: String,
-    url_template: String,
+    home_page_url: String,
+    url_template: Option<&'static str>,
 }
 
 fn main() -> io::Result<()> {
     let last_briefing =
         NaiveDateTime::parse_from_str("2018-12-01 00:00", "%Y-%m-%d %H:%M").unwrap();
 
-    let release_notes_templates_map: HashMap<&str, &str> = url_templates::RELEASE_NOTES_TEMPLATES
-        .iter()
-        .cloned()
-        .collect();
+    let release_notes_templates_map: HashMap<&str, &str> =
+        url_templates::RELEASE_NOTES_TEMPLATES
+            .iter()
+            .cloned()
+            .collect();
 
     let installed_packages: HashMap<String, Package> = {
         let installed_packages_output = String::from_utf8(
@@ -64,11 +66,10 @@ fn main() -> io::Result<()> {
             packages.insert(
                 package_name.clone(),
                 Package {
-                    name: package_name,
+                    name: package_name.clone(),
+                    home_page_url: captures_iter.next().unwrap()[3].to_string(),
                     url_template: release_notes_templates_map
-                        .get(&captures[3])
-                        .unwrap_or(&&captures_iter.next().unwrap()[3])
-                        .to_string(),
+                        .get(package_name.as_str()).map(|&s| s),
                 },
             );
         }
@@ -108,15 +109,17 @@ fn main() -> io::Result<()> {
     };
 
     for (package_name, upgrades) in upgrades_by_name {
-        let url_template = installed_packages
-            .get(&package_name)
-            .map(|package| &package.url_template)
-            .unwrap();
-        let versions = upgrades.iter().map(|upgrade| &upgrade.new_version);
+        let package = installed_packages.get(&package_name).unwrap();
         println!("{}:", package_name);
-        for version in versions {
-            let url_formatted = url_templates::format_url(&url_template, &version);
-            println!("\t{}", url_formatted);
+        match package.url_template {
+            Some(template) => {
+                let versions = upgrades.iter().map(|upgrade| &upgrade.new_version);
+                for version in versions {
+                    let url_formatted = url_templates::format_url(&template, &version);
+                    println!("\t{}", url_formatted);
+                }
+            },
+            None => println!("\t{}", package.home_page_url),
         }
     }
 
