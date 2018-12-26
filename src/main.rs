@@ -19,7 +19,11 @@ pub struct Upgrade {
     url: String,
 }
 
-fn extract_upgrade(s: &str, regex: &Regex, packages: &HashMap<String, Package>) -> Option<Upgrade> {
+fn string_to_upgrade(
+    s: &str,
+    regex: &Regex,
+    packages: &HashMap<String, Package>,
+) -> Option<Upgrade> {
     let maybe_line_captures = regex.captures(s);
     maybe_line_captures.and_then(|caps| {
         packages.get(&caps[2].to_string()).map(|package| Upgrade {
@@ -94,7 +98,7 @@ fn main() -> io::Result<()> {
             .filter_map(|result_str| {
                 result_str
                     .ok()
-                    .and_then(|s| extract_upgrade(&s, &regex, &installed_packages))
+                    .and_then(|s| string_to_upgrade(&s, &regex, &installed_packages))
             })
             .skip_while(|upgrade| upgrade.timestamp < last_briefing)
             .filter(|upgrade| installed_package_names.contains(&upgrade.package.name))
