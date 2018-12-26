@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
@@ -40,11 +40,10 @@ fn main() -> io::Result<()> {
     let last_briefing =
         NaiveDateTime::parse_from_str("2018-12-01 00:00", "%Y-%m-%d %H:%M").unwrap();
 
-    let release_notes_templates_map: HashMap<&str, &str> =
-        url_templates::RELEASE_NOTES_TEMPLATES
-            .iter()
-            .cloned()
-            .collect();
+    let release_notes_templates_map: HashMap<&str, &str> = url_templates::RELEASE_NOTES_TEMPLATES
+        .iter()
+        .cloned()
+        .collect();
 
     let installed_packages: HashMap<String, Package> = {
         let installed_packages_output = String::from_utf8(
@@ -70,7 +69,8 @@ fn main() -> io::Result<()> {
                     name: package_name.clone(),
                     home_page_url: captures_iter.next().unwrap()[3].to_string(),
                     url_template: release_notes_templates_map
-                        .get(package_name.as_str()).map(|&s| s),
+                        .get(package_name.as_str())
+                        .map(|&s| s),
                 },
             );
         }
@@ -119,7 +119,7 @@ fn main() -> io::Result<()> {
                     let url_formatted = url_templates::format_url(&template, &version);
                     println!("\t{}", url_formatted);
                 }
-            },
+            }
             None => println!("\t{}", package.home_page_url),
         }
     }
