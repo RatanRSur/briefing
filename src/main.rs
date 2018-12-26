@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
@@ -76,7 +77,7 @@ fn main() -> io::Result<()> {
         packages
     };
 
-    let upgrades_by_name: HashMap<String, Vec<Upgrade>> = {
+    let upgrades_by_name = {
         let f = BufReader::new(File::open("/var/log/pacman.log")?);
 
         let regex = Regex::new(r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded ([^ ]*) \((.+) -> (\d:)?([^-+]+).*\)$",).unwrap();
@@ -87,7 +88,7 @@ fn main() -> io::Result<()> {
             .cloned()
             .collect();
 
-        let mut accumulator: HashMap<String, Vec<Upgrade>> = HashMap::new();
+        let mut accumulator: BTreeMap<String, Vec<Upgrade>> = BTreeMap::new();
         let upgrades = f
             .lines()
             .filter_map(|result_str| result_str.ok().and_then(|s| string_to_upgrade(&s, &regex)))
