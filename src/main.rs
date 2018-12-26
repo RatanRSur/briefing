@@ -56,7 +56,7 @@ impl FromStr for Upgrade {
     }
 }
 
-#[derive(Debug, PartialEq, Hash, Eq, Clone)]
+#[derive(Debug)]
 struct Package {
     name: String,
     home_page_url: String,
