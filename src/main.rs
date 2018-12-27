@@ -71,61 +71,15 @@ fn main() -> io::Result<()> {
         NaiveDateTime::parse_from_str("2018-12-01 00:00", "%Y-%m-%d %H:%M").unwrap();
 
     let upgrades_by_package: BTreeMap<Package, Vec<Upgrade>> = {
-        let installed_packages = {
-            let installed_packages_output = String::from_utf8(
-                Command::new("/usr/bin/pacman")
-                    .arg("--query")
-                    .arg("--explicit")
-                    .arg("--info")
-                    .output()
-                    .expect("failed to execute process")
-                    .stdout,
-            )
-            .unwrap();
-
-            let regex = Regex::new(r"(^|\n)(Name|URL) +: (?P<value>.*)\n").unwrap();
-
-            let mut packages = HashMap::new();
-            let mut captures_iter = regex.captures_iter(&installed_packages_output);
-            while let Some(captures) = captures_iter.next() {
-                let package_name = String::from(&captures["value"]);
-                packages.insert(
-                    package_name.clone(),
-                    Package {
-                        name: package_name.clone(),
-                        home_page_url: captures_iter.next().unwrap()["value"].to_string(),
-                        url_template: url_templates::RELEASE_NOTES_TEMPLATES
-                            .get(package_name.as_str())
-                            .map(|&s| s),
-                    },
-                );
-            }
-            packages
-        };
-
+        let installed_packages_by_name = get_installed_packages_by_name();
         let mut accumulator = BTreeMap::new();
-        let upgrades_by_name = {
-            let f = BufReader::new(File::open("/var/log/pacman.log")?);
-
-            let mut accumulator = HashMap::new();
-            let upgrades = f
-                .lines()
-                .filter_map(|result_str| result_str.ok().and_then(|s| Upgrade::from_str(&s).ok()))
-                .skip_while(|upgrade| upgrade.timestamp < last_briefing)
-                .filter(|upgrade| installed_packages.contains_key(&upgrade.package_name));
-
-            for upgrade in upgrades {
-                let vec = accumulator
-                    .entry(upgrade.package_name.clone())
-                    .or_insert(Vec::new());
-                vec.push(upgrade);
-            }
-
-            accumulator
-        };
+        let upgrades_by_name = get_upgrades_by_name(last_briefing, &installed_packages_by_name);
 
         for (name, upgrades) in upgrades_by_name {
-            accumulator.insert(installed_packages.get(&name).unwrap().to_owned(), upgrades);
+            accumulator.insert(
+                installed_packages_by_name.get(&name).unwrap().to_owned(),
+                upgrades,
+            );
         }
 
         accumulator
@@ -174,4 +128,59 @@ fn print_with_margin(margin_width: usize, str: &str) {
         .map(|_| " ")
         .collect::<String>();
     print!(" {}{} ", spaces, str.bold().magenta());
+}
+
+fn get_upgrades_by_name(
+    last_briefing: NaiveDateTime,
+    installed_packages_by_name: &HashMap<String, Package>,
+) -> HashMap<String, Vec<Upgrade>> {
+    let f = BufReader::new(File::open("/var/log/pacman.log").unwrap());
+
+    let mut accumulator = HashMap::new();
+    let upgrades = f
+        .lines()
+        .filter_map(|result_str| result_str.ok().and_then(|s| Upgrade::from_str(&s).ok()))
+        .skip_while(|upgrade| upgrade.timestamp < last_briefing)
+        .filter(|upgrade| installed_packages_by_name.contains_key(&upgrade.package_name));
+
+    for upgrade in upgrades {
+        let vec = accumulator
+            .entry(upgrade.package_name.clone())
+            .or_insert(Vec::new());
+        vec.push(upgrade);
+    }
+
+    accumulator
+}
+
+fn get_installed_packages_by_name() -> HashMap<String, Package> {
+    let installed_packages_output = String::from_utf8(
+        Command::new("/usr/bin/pacman")
+            .arg("--query")
+            .arg("--explicit")
+            .arg("--info")
+            .output()
+            .expect("failed to execute process")
+            .stdout,
+    )
+    .unwrap();
+
+    let regex = Regex::new(r"(^|\n)(Name|URL) +: (?P<value>.*)\n").unwrap();
+
+    let mut packages = HashMap::new();
+    let mut captures_iter = regex.captures_iter(&installed_packages_output);
+    while let Some(captures) = captures_iter.next() {
+        let package_name = String::from(&captures["value"]);
+        packages.insert(
+            package_name.clone(),
+            Package {
+                name: package_name.clone(),
+                home_page_url: captures_iter.next().unwrap()["value"].to_string(),
+                url_template: url_templates::RELEASE_NOTES_TEMPLATES
+                    .get(package_name.as_str())
+                    .map(|&s| s),
+            },
+        );
+    }
+    packages
 }
