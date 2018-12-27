@@ -1,3 +1,4 @@
+use colored::*;
 use lazy_static::lazy_static;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -130,20 +131,35 @@ fn main() -> io::Result<()> {
         accumulator
     };
 
+    let max_package_name_len = upgrades_by_name
+        .keys()
+        .map(|name| name.len())
+        .max()
+        .unwrap();
+
     for (package_name, upgrades) in upgrades_by_name {
         let package = installed_packages.get(&package_name).unwrap();
-        println!("{}:", package_name);
+        print_with_margin(&package_name, max_package_name_len);
         match package.url_template {
             Some(template) => {
                 let versions = upgrades.iter().map(|upgrade| &upgrade.new_version);
-                for version in versions {
+
+                for (i, version) in versions.enumerate() {
                     let url_formatted = url_templates::format_url(&template, &version);
-                    println!("\t{}", url_formatted);
+                    if i != 0 {
+                        print_with_margin("", max_package_name_len);
+                    }
+                    println!("{}", url_formatted);
                 }
             }
-            None => println!("\t{}", package.home_page_url),
+            None => println!("{}", package.home_page_url),
         }
     }
 
     Ok(())
+}
+
+fn print_with_margin(str: &str, max_len: usize) {
+    let spaces = (0..(max_len - str.len())).map(|_| " ").collect::<String>();
+    print!(" {}{} ", spaces, str.bold().magenta());
 }
