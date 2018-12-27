@@ -1,4 +1,3 @@
-use colored::*;
 use lazy_static::lazy_static;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
