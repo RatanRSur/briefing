@@ -91,43 +91,73 @@ fn main() -> io::Result<()> {
         .max()
         .unwrap();
 
-    for (package, upgrades) in upgrades_by_package {
-        match package.url_template {
-            Some(template) => {
-                let formatted_urls = {
-                    let versions = upgrades.iter().map(|upgrade| &upgrade.new_version);
-                    versions
-                        .map(|version| url_templates::format_url(&template, &version))
-                        .collect()
-                };
-                print_package_block(margin_width, &package.name, &formatted_urls);
-            }
-            None => print_package_block(
-                margin_width,
+    let (specified_url_group, unspecified_url_group): (Vec<_>, Vec<_>) = upgrades_by_package
+        .iter()
+        .partition(|(package, _)| package.url_template.is_some());
+
+    let unspecified_url_outputs = unspecified_url_group
+        .iter()
+        .map(|(package, _)| (&package.name, vec![package.home_page_url.clone()]))
+        .map(|(name, urls)| package_output(margin_width, &name, &urls));
+    let specified_url_outputs = specified_url_group
+        .iter()
+        .map(|(package, upgrades)| {
+            (
                 &package.name,
-                &vec![package.home_page_url.to_string()],
-            ),
-        }
-    }
+                upgrades
+                    .iter()
+                    .map(|upgrade| {
+                        url_templates::format_url(
+                            package.url_template.unwrap(),
+                            &upgrade.new_version,
+                        )
+                    })
+                    .collect(),
+            )
+        })
+        .map(|(name, urls)| package_output(margin_width, &name, &urls));
+
+    println!("");
+    print!("{}", left_pad_to_width(margin_width, ""));
+    println!("{}", section_header(margin_width, "Homepages"));
+    unspecified_url_outputs.for_each(|s| print!("{}", s));
+    println!("");
+    print!("{}", left_pad_to_width(margin_width, ""));
+    println!("{}", section_header(margin_width, "Release Notes"));
+    specified_url_outputs.for_each(|s| print!("{}", s));
 
     Ok(())
 }
 
-fn print_package_block(margin_width: usize, package_name: &str, urls: &Vec<String>) {
-    print_with_margin(margin_width, package_name);
-    for (i, url) in urls.iter().enumerate() {
-        if i != 0 {
-            print_with_margin(margin_width, "");
-        }
-        println!("{}", url);
-    }
+fn section_header(margin_width: usize, header: &str) -> String {
+    let mut buf = String::new();
+    buf.push('\n');
+    buf.push_str(&left_pad_to_width(margin_width, ""));
+    buf.push(' ');
+    buf.push_str(header);
+    buf.push('\n');
+    buf
 }
 
-fn print_with_margin(margin_width: usize, str: &str) {
-    let spaces = (0..(margin_width - str.len()))
-        .map(|_| " ")
-        .collect::<String>();
-    print!(" {}{} ", spaces, str.bold().magenta());
+fn package_output(margin_width: usize, package_name: &str, urls: &Vec<String>) -> String {
+    let mut buf = String::new();
+    buf.push_str(&left_pad_to_width(margin_width, package_name));
+    for (i, url) in urls.iter().enumerate() {
+        if i != 0 {
+            buf.push_str(&left_pad_to_width(margin_width, ""));
+        }
+        buf.push(' ');
+        buf.push_str(url);
+        buf.push('\n');
+    }
+    buf
+}
+
+fn left_pad_to_width(width: usize, str: &str) -> String {
+    let mut buf = String::new(); //String::from((0..(width - str.len())).map(|_| ' ').collect());
+    (0..(width - str.len())).for_each(|_| buf.push(' '));
+    buf.push_str(str);
+    buf
 }
 
 fn get_upgrades_by_name(
