@@ -29,11 +29,19 @@ lazy_static! {
             "neovim",
             "https://github.com/neovim/neovim/releases/tag/v{version}",
         ),
+        (
+            "tmux",
+            "https://raw.githubusercontent.com/tmux/tmux/{version}/CHANGES"
+        ),
         ("vim", "https://github.com/vim/vim/releases/tag/v{version}"),
         (
             "youtube-dl",
             "https://github.com/rg3/youtube-dl/releases/tag/{version}",
-        )
+        ),
+        (
+            "yay",
+            "https://github.com/Jguer/yay/releases/tag/v{version}"
+        ),
     ]
     .iter()
     .cloned()
