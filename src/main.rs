@@ -117,11 +117,9 @@ fn main() -> io::Result<()> {
         .map(|(name, urls)| package_output(margin_width, &name, &urls));
 
     println!("");
-    print!("{}", left_pad_to_width(margin_width, ""));
     println!("{}", section_header(margin_width, "Homepages"));
     unspecified_url_outputs.for_each(|s| print!("{}", s));
     println!("");
-    print!("{}", left_pad_to_width(margin_width, ""));
     println!("{}", section_header(margin_width, "Release Notes"));
     specified_url_outputs.for_each(|s| print!("{}", s));
 
