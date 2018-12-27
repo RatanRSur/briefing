@@ -2,7 +2,6 @@ use colored::*;
 use lazy_static::lazy_static;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
-use std::collections::HashSet;
 use std::error::Error;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -106,18 +105,12 @@ fn main() -> io::Result<()> {
     let upgrades_by_name: BTreeMap<String, Vec<Upgrade>> = {
         let f = BufReader::new(File::open("/var/log/pacman.log")?);
 
-        let installed_package_names: HashSet<_> = installed_packages
-            .iter()
-            .map(|name_and_package| name_and_package.0)
-            .cloned()
-            .collect();
-
         let mut accumulator = BTreeMap::new();
         let upgrades = f
             .lines()
             .filter_map(|result_str| result_str.ok().and_then(|s| Upgrade::from_str(&s).ok()))
             .skip_while(|upgrade| upgrade.timestamp < last_briefing)
-            .filter(|upgrade| installed_package_names.contains(&upgrade.package_name));
+            .filter(|upgrade| installed_packages.contains_key(&upgrade.package_name));
 
         for upgrade in upgrades {
             let vec = accumulator
