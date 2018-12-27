@@ -151,7 +151,8 @@ fn package_output(margin_width: usize, package_name: &str, urls: &Vec<String>) -
 }
 
 fn left_pad_to_width(width: usize, str: &str) -> String {
-    let mut buf = String::new(); //String::from((0..(width - str.len())).map(|_| ' ').collect());
+    let mut buf = String::new();
+    buf.push(' ');
     (0..(width - str.len())).for_each(|_| buf.push(' '));
     buf.push_str(str);
     buf
