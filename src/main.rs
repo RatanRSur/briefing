@@ -129,7 +129,7 @@ fn main() -> io::Result<()> {
         accumulator
     };
 
-    let max_upgrade_name_len = upgrades_by_name
+    let margin_width = upgrades_by_name
         .keys()
         .map(|name| name.len())
         .max()
@@ -137,27 +137,40 @@ fn main() -> io::Result<()> {
 
     for (package_name, upgrades) in upgrades_by_name {
         let package = installed_packages.get(&package_name).unwrap();
-        print_with_margin(&package_name, max_upgrade_name_len);
         match package.url_template {
             Some(template) => {
-                let versions = upgrades.iter().map(|upgrade| &upgrade.new_version);
-
-                for (i, version) in versions.enumerate() {
-                    let url_formatted = url_templates::format_url(&template, &version);
-                    if i != 0 {
-                        print_with_margin("", max_upgrade_name_len);
-                    }
-                    println!("{}", url_formatted);
-                }
+                let formatted_urls = {
+                    let versions = upgrades.iter().map(|upgrade| &upgrade.new_version);
+                    versions
+                        .map(|version| url_templates::format_url(&template, &version))
+                        .collect()
+                };
+                print_package_block(margin_width, &package_name, &formatted_urls);
             }
-            None => println!("{}", package.home_page_url),
+            None => print_package_block(
+                margin_width,
+                &package_name,
+                &vec![package.home_page_url.to_string()],
+            ),
         }
     }
 
     Ok(())
 }
 
-fn print_with_margin(str: &str, max_len: usize) {
-    let spaces = (0..(max_len - str.len())).map(|_| " ").collect::<String>();
+fn print_package_block(margin_width: usize, package_name: &str, urls: &Vec<String>) {
+    print_with_margin(margin_width, package_name);
+    for (i, url) in urls.iter().enumerate() {
+        if i != 0 {
+            print_with_margin(margin_width, "");
+        }
+        println!("{}", url);
+    }
+}
+
+fn print_with_margin(margin_width: usize, str: &str) {
+    let spaces = (0..(margin_width - str.len()))
+        .map(|_| " ")
+        .collect::<String>();
     print!(" {}{} ", spaces, str.bold().magenta());
 }
