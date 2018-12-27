@@ -68,11 +68,6 @@ fn main() -> io::Result<()> {
     let last_briefing =
         NaiveDateTime::parse_from_str("2018-12-01 00:00", "%Y-%m-%d %H:%M").unwrap();
 
-    let release_notes_templates_map: HashMap<&str, &str> = url_templates::RELEASE_NOTES_TEMPLATES
-        .iter()
-        .cloned()
-        .collect();
-
     let installed_packages: HashMap<String, Package> = {
         let installed_packages_output = String::from_utf8(
             Command::new("/usr/bin/pacman")
@@ -96,7 +91,7 @@ fn main() -> io::Result<()> {
                 Package {
                     name: package_name.clone(),
                     home_page_url: captures_iter.next().unwrap()[3].to_string(),
-                    url_template: release_notes_templates_map
+                    url_template: url_templates::RELEASE_NOTES_TEMPLATES
                         .get(package_name.as_str())
                         .map(|&s| s),
                 },
