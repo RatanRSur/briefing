@@ -100,7 +100,7 @@ fn main() -> io::Result<()> {
         packages
     };
 
-    let upgrades_by_name = {
+    let upgrades_by_name: BTreeMap<String, Vec<Upgrade>> = {
         let f = BufReader::new(File::open("/var/log/pacman.log")?);
 
         let installed_package_names: HashSet<_> = installed_packages
@@ -109,7 +109,7 @@ fn main() -> io::Result<()> {
             .cloned()
             .collect();
 
-        let mut accumulator: BTreeMap<String, Vec<Upgrade>> = BTreeMap::new();
+        let mut accumulator = BTreeMap::new();
         let upgrades = f
             .lines()
             .filter_map(|result_str| result_str.ok().and_then(|s| Upgrade::from_str(&s).ok()))
