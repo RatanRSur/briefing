@@ -88,7 +88,7 @@ fn main() -> io::Result<()> {
         .keys()
         .map(|package| package.name.len())
         .max()
-        .unwrap();
+        .unwrap_or(0);
 
     let (specified_url_group, unspecified_url_group): (Vec<_>, Vec<_>) = upgrades_by_package
         .iter()
