@@ -126,7 +126,7 @@ fn main() -> io::Result<()> {
         accumulator
     };
 
-    let max_package_name_len = upgrades_by_name
+    let max_upgrade_name_len = upgrades_by_name
         .keys()
         .map(|name| name.len())
         .max()
@@ -134,7 +134,7 @@ fn main() -> io::Result<()> {
 
     for (package_name, upgrades) in upgrades_by_name {
         let package = installed_packages.get(&package_name).unwrap();
-        print_with_margin(&package_name, max_package_name_len);
+        print_with_margin(&package_name, max_upgrade_name_len);
         match package.url_template {
             Some(template) => {
                 let versions = upgrades.iter().map(|upgrade| &upgrade.new_version);
@@ -142,7 +142,7 @@ fn main() -> io::Result<()> {
                 for (i, version) in versions.enumerate() {
                     let url_formatted = url_templates::format_url(&template, &version);
                     if i != 0 {
-                        print_with_margin("", max_package_name_len);
+                        print_with_margin("", max_upgrade_name_len);
                     }
                     println!("{}", url_formatted);
                 }
