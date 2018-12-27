@@ -1,5 +1,6 @@
 use ansi_term::Style;
 use lazy_static::lazy_static;
+use semver::Version;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::error::Error;
