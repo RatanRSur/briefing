@@ -129,11 +129,9 @@ fn main() -> io::Result<()> {
 
 fn section_header(margin_width: usize, header: &str) -> String {
     let mut buf = String::new();
-    buf.push('\n');
     buf.push_str(&left_pad_to_width(margin_width, ""));
     buf.push(' ');
     buf.push_str(header);
-    buf.push('\n');
     bold(buf)
 }
 
