@@ -9,13 +9,12 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader};
 use std::str::FromStr;
+use strfmt::strfmt;
 
 use std::process::Command;
 
 use chrono::naive::NaiveDateTime;
 use regex::Regex;
-
-mod url_templates;
 
 #[derive(Debug)]
 pub struct Upgrade {
@@ -107,12 +106,7 @@ fn main() -> io::Result<()> {
                 &package.name,
                 upgrades
                     .iter()
-                    .map(|upgrade| {
-                        url_templates::format_url(
-                            package.url_template.unwrap(),
-                            &upgrade.new_version,
-                        )
-                    })
+                    .map(|upgrade| format_url(package.url_template.unwrap(), &upgrade.new_version))
                     .collect(),
             )
         })
@@ -167,6 +161,15 @@ fn bold(str: String) -> String {
     Style::new().bold().paint(str).to_string()
 }
 
+pub fn format_url(template: &str, version: &str) -> String {
+    let format_args: HashMap<String, &str> = [(String::from("version"), version)]
+        .iter()
+        .cloned()
+        .collect();
+
+    strfmt(template, &format_args).unwrap()
+}
+
 fn get_upgrades_by_name(
     last_briefing: NaiveDateTime,
     installed_packages_by_name: &HashMap<String, Package>,
@@ -213,7 +216,7 @@ fn get_installed_packages_by_name() -> HashMap<String, Package> {
             Package {
                 name: package_name.clone(),
                 home_page_url: captures_iter.next().unwrap()["value"].to_string(),
-                url_template: url_templates::RELEASE_NOTES_TEMPLATES
+                url_template: templates::RELEASE_NOTES_TEMPLATES
                     .get(package_name.as_str())
                     .map(|&s| s),
             },

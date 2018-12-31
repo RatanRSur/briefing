@@ -1,13 +1,8 @@
 [package]
-name = "briefing"
+name = "templates"
 version = "0.1.0"
 authors = ["Ratan Rai Sur <ratan.r.sur@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-regex = "1"
-chrono = "0.4"
-strfmt = "0.1.6"
 lazy_static = "1.2.0"
-ansi_term = "0.11"
-templates = { path = "lib/templates" }

@@ -1,6 +1,5 @@
 use lazy_static::lazy_static;
 use std::collections::HashMap;
-use strfmt::strfmt;
 
 lazy_static! {
     pub static ref RELEASE_NOTES_TEMPLATES: HashMap<&'static str, &'static str> = [
@@ -46,13 +45,4 @@ lazy_static! {
     .iter()
     .cloned()
     .collect();
-}
-
-pub fn format_url(template: &str, version: &str) -> String {
-    let format_args: HashMap<String, &str> = [(String::from("version"), version)]
-        .iter()
-        .cloned()
-        .collect();
-
-    strfmt(template, &format_args).unwrap()
 }
