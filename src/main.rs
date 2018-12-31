@@ -95,11 +95,12 @@ fn main() -> io::Result<()> {
         .iter()
         .partition(|(package, _)| package.url_template.is_some());
 
-    let unspecified_url_outputs = unspecified_url_group
+    let unspecified_url_outputs: Vec<String> = unspecified_url_group
         .iter()
         .map(|(package, _)| (&package.name, vec![package.home_page_url.clone()]))
-        .map(|(name, urls)| package_output(margin_width, &name, &urls));
-    let specified_url_outputs = specified_url_group
+        .map(|(name, urls)| package_output(margin_width, &name, &urls))
+        .collect();
+    let specified_url_outputs: Vec<String> = specified_url_group
         .iter()
         .map(|(package, upgrades)| {
             (
@@ -115,14 +116,19 @@ fn main() -> io::Result<()> {
                     .collect(),
             )
         })
-        .map(|(name, urls)| package_output(margin_width, &name, &urls));
+        .map(|(name, urls)| package_output(margin_width, &name, &urls))
+        .collect();
 
-    println!("");
-    println!("{}", section_header(margin_width, "Homepages"));
-    unspecified_url_outputs.for_each(|s| print!("{}", s));
-    println!("");
-    println!("{}", section_header(margin_width, "Release Notes"));
-    specified_url_outputs.for_each(|s| print!("{}", s));
+    if unspecified_url_outputs.len() > 0 {
+        println!("");
+        println!("{}", section_header(margin_width, "Homepages"));
+        unspecified_url_outputs.iter().for_each(|s| print!("{}", s));
+    }
+    if specified_url_outputs.len() > 0 {
+        println!("");
+        println!("{}", section_header(margin_width, "Release Notes"));
+        specified_url_outputs.iter().for_each(|s| print!("{}", s));
+    }
 
     Ok(())
 }
