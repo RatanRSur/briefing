@@ -1,4 +1,3 @@
-use ansi_term::Color::Purple;
 use ansi_term::Style;
 use lazy_static::lazy_static;
 use std::collections::BTreeMap;
