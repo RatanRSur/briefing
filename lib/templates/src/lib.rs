@@ -45,4 +45,9 @@ lazy_static! {
     .iter()
     .cloned()
     .collect();
+    pub static ref RELEASE_NOTES_MONO_PAGES: HashMap<&'static str, &'static str> =
+        [("virtualbox", "https://www.virtualbox.org/wiki/Changelog")]
+            .iter()
+            .cloned()
+            .collect();
 }

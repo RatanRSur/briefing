@@ -62,7 +62,6 @@ impl FromStr for Upgrade {
 struct Package {
     name: String,
     home_page_url: String,
-    url_template: Option<&'static str>,
 }
 
 fn main() -> io::Result<()> {
@@ -90,38 +89,66 @@ fn main() -> io::Result<()> {
         .max()
         .unwrap_or(0);
 
-    let (specified_url_group, unspecified_url_group): (Vec<_>, Vec<_>) = upgrades_by_package
-        .iter()
-        .partition(|(package, _)| package.url_template.is_some());
+    let mut home_page_group = Vec::new();
+    let mut mono_page_group = Vec::new();
+    let mut template_group = Vec::new();
 
-    let unspecified_url_outputs: Vec<String> = unspecified_url_group
+    for (package, upgrades) in upgrades_by_package {
+        if templates::RELEASE_NOTES_TEMPLATES.contains_key(package.name.as_str()) {
+            template_group.push((package, upgrades))
+        } else if templates::RELEASE_NOTES_MONO_PAGES.contains_key(package.name.as_str()) {
+            let url = templates::RELEASE_NOTES_MONO_PAGES
+                .get(package.name.as_str())
+                .unwrap();
+            mono_page_group.push((package, url))
+        } else {
+            home_page_group.push(package)
+        }
+    }
+
+    let home_page_outputs: Vec<String> = home_page_group
         .iter()
-        .map(|(package, _)| (&package.name, vec![package.home_page_url.clone()]))
+        .map(|package| (&package.name, vec![package.home_page_url.clone()]))
         .map(|(name, urls)| package_output(margin_width, &name, &urls))
         .collect();
-    let specified_url_outputs: Vec<String> = specified_url_group
+    let template_outputs: Vec<String> = template_group
         .iter()
         .map(|(package, upgrades)| {
             (
                 &package.name,
                 upgrades
                     .iter()
-                    .map(|upgrade| format_url(package.url_template.unwrap(), &upgrade.new_version))
+                    .map(|upgrade| {
+                        format_url(
+                            project_urls::TEMPLATES.get(package.name.as_str()).unwrap(),
+                            &upgrade.new_version,
+                        )
+                    })
                     .collect(),
             )
         })
         .map(|(name, urls)| package_output(margin_width, &name, &urls))
         .collect();
+    let mono_page_outputs = mono_page_group.iter().map(|(package, mono_page_url)| {
+        package_output(
+            margin_width,
+            &package.name,
+            &vec![String::from(**mono_page_url)],
+        )
+    });
 
-    if unspecified_url_outputs.len() > 0 {
+    if home_page_group.len() > 0 {
         println!("");
         println!("{}", section_header(margin_width, "Homepages"));
-        unspecified_url_outputs.iter().for_each(|s| print!("{}", s));
+        home_page_outputs.iter().for_each(|s| print!("{}", s));
     }
-    if specified_url_outputs.len() > 0 {
+    if template_group.len() > 0 {
         println!("");
         println!("{}", section_header(margin_width, "Release Notes"));
-        specified_url_outputs.iter().for_each(|s| print!("{}", s));
+        template_outputs.iter().for_each(|s| print!("{}", s));
+    }
+    if mono_page_group.len() > 0 {
+        mono_page_outputs.for_each(|s| print!("{}", s));
     }
 
     Ok(())
@@ -216,9 +243,6 @@ fn get_installed_packages_by_name() -> HashMap<String, Package> {
             Package {
                 name: package_name.clone(),
                 home_page_url: captures_iter.next().unwrap()["value"].to_string(),
-                url_template: templates::RELEASE_NOTES_TEMPLATES
-                    .get(package_name.as_str())
-                    .map(|&s| s),
             },
         );
     }
