@@ -67,7 +67,7 @@ struct Package {
 
 fn main() -> io::Result<()> {
     let last_briefing =
-        NaiveDateTime::parse_from_str("2018-12-01 00:00", "%Y-%m-%d %H:%M").unwrap();
+        NaiveDateTime::parse_from_str("2019-01-01 00:00", "%Y-%m-%d %H:%M").unwrap();
 
     let upgrades_by_package: BTreeMap<Package, Vec<Upgrade>> = {
         let installed_packages_by_name = get_installed_packages_by_name();
