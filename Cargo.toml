@@ -10,4 +10,4 @@ chrono = "0.4"
 strfmt = "0.1.6"
 lazy_static = "1.2.0"
 ansi_term = "0.11"
-templates = { path = "lib/templates" }
+project_urls = { path = "lib/project_urls" }

@@ -21,9 +21,9 @@ dependencies = [
  "ansi_term 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "chrono 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "project_urls 0.1.0",
  "regex 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "strfmt 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "templates 0.1.0",
 ]
 
 [[package]]
@@ -74,6 +74,13 @@ version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "project_urls"
+version = "0.1.0"
+dependencies = [
+ "lazy_static 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "redox_syscall"
 version = "0.1.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -102,13 +109,6 @@ dependencies = [
 name = "strfmt"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
-name = "templates"
-version = "0.1.0"
-dependencies = [
- "lazy_static 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
 
 [[package]]
 name = "thread_local"

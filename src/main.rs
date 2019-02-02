@@ -94,12 +94,10 @@ fn main() -> io::Result<()> {
     let mut template_group = Vec::new();
 
     for (package, upgrades) in upgrades_by_package {
-        if templates::RELEASE_NOTES_TEMPLATES.contains_key(package.name.as_str()) {
+        if project_urls::TEMPLATES.contains_key(package.name.as_str()) {
             template_group.push((package, upgrades))
-        } else if templates::RELEASE_NOTES_MONO_PAGES.contains_key(package.name.as_str()) {
-            let url = templates::RELEASE_NOTES_MONO_PAGES
-                .get(package.name.as_str())
-                .unwrap();
+        } else if project_urls::MONO_PAGES.contains_key(package.name.as_str()) {
+            let url = project_urls::MONO_PAGES.get(package.name.as_str()).unwrap();
             mono_page_group.push((package, url))
         } else {
             home_page_group.push(package)

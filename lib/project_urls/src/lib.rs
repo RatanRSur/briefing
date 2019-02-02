@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 use std::collections::HashMap;
 
 lazy_static! {
-    pub static ref RELEASE_NOTES_TEMPLATES: HashMap<&'static str, &'static str> = [
+    pub static ref TEMPLATES: HashMap<&'static str, &'static str> = [
         (
             "alacritty",
             "https://github.com/jwilm/alacritty/releases/tag/v{version}",
@@ -45,7 +45,7 @@ lazy_static! {
     .iter()
     .cloned()
     .collect();
-    pub static ref RELEASE_NOTES_MONO_PAGES: HashMap<&'static str, &'static str> =
+    pub static ref MONO_PAGES: HashMap<&'static str, &'static str> =
         [("virtualbox", "https://www.virtualbox.org/wiki/Changelog")]
             .iter()
             .cloned()
