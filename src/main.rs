@@ -1,10 +1,12 @@
 use ansi_term::Style;
+//use clap::{App, Arg};
 use lazy_static::lazy_static;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt::Display;
 use std::fmt::Formatter;
+use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader};
@@ -65,13 +67,23 @@ struct Package {
 }
 
 fn main() -> io::Result<()> {
-    let last_briefing =
-        NaiveDateTime::parse_from_str("2019-01-01 00:00", "%Y-%m-%d %H:%M").unwrap();
+    let date_format = "%Y-%m-%d %H:%M";
+    let mut cache_file = dirs::home_dir().unwrap();
+    cache_file.push(".cache");
+    cache_file.push("briefing");
+    let last_briefing_time = NaiveDateTime::parse_from_str(
+        &fs::read_to_string(&cache_file).unwrap_or(String::from("2002-03-11 00:00")),
+        date_format,
+    )
+    .unwrap();
+
+    let current_briefing_time = chrono::offset::Local::now().naive_local();
 
     let upgrades_by_package: BTreeMap<Package, Vec<Upgrade>> = {
         let installed_packages_by_name = get_installed_packages_by_name();
         let mut accumulator = BTreeMap::new();
-        let upgrades_by_name = get_upgrades_by_name(last_briefing, &installed_packages_by_name);
+        let upgrades_by_name =
+            get_upgrades_by_name(last_briefing_time, &installed_packages_by_name);
 
         for (name, upgrades) in upgrades_by_name {
             accumulator.insert(
@@ -149,6 +161,12 @@ fn main() -> io::Result<()> {
         mono_page_outputs.for_each(|s| print!("{}", s));
     }
 
+    fs::write(
+        cache_file,
+        current_briefing_time.format(date_format).to_string(),
+    )
+    .expect("Something went wrong in updating the cache file.");
+
     Ok(())
 }
 
@@ -196,7 +214,7 @@ pub fn format_url(template: &str, version: &str) -> String {
 }
 
 fn get_upgrades_by_name(
-    last_briefing: NaiveDateTime,
+    last_briefing_time: NaiveDateTime,
     installed_packages_by_name: &HashMap<String, Package>,
 ) -> HashMap<String, Vec<Upgrade>> {
     let f = BufReader::new(File::open("/var/log/pacman.log").unwrap());
@@ -205,7 +223,7 @@ fn get_upgrades_by_name(
     let upgrades = f
         .lines()
         .filter_map(|result_str| result_str.ok().and_then(|s| Upgrade::from_str(&s).ok()))
-        .skip_while(|upgrade| upgrade.timestamp < last_briefing)
+        .skip_while(|upgrade| upgrade.timestamp < last_briefing_time)
         .filter(|upgrade| installed_packages_by_name.contains_key(&upgrade.package_name));
 
     for upgrade in upgrades {
