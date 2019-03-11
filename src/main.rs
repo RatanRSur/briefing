@@ -118,7 +118,8 @@ fn main() -> io::Result<()> {
         .keys()
         .map(|package| package.name.len())
         .max()
-        .unwrap_or(0);
+        .unwrap_or(0)
+        + 1;
 
     let mut home_page_group = Vec::new();
     let mut mono_page_group = Vec::new();
@@ -213,7 +214,6 @@ fn package_output(margin_width: usize, package_name: &str, urls: &Vec<String>) -
 
 fn left_pad_to_width(width: usize, str: &str) -> String {
     let mut buf = String::new();
-    buf.push(' ');
     (0..(width - str.len())).for_each(|_| buf.push(' '));
     buf.push_str(str);
     buf
