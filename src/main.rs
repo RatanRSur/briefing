@@ -19,7 +19,7 @@ use chrono::naive::NaiveDateTime;
 use regex::Regex;
 
 #[derive(Debug)]
-pub struct Upgrade {
+struct Upgrade {
     timestamp: NaiveDateTime,
     package_name: String,
     old_version: String,
@@ -27,7 +27,7 @@ pub struct Upgrade {
 }
 
 #[derive(Debug)]
-pub enum ParseUpgradeError {
+enum ParseUpgradeError {
     Error,
 }
 impl Error for ParseUpgradeError {}
@@ -223,7 +223,7 @@ fn bold(str: String) -> String {
     Style::new().bold().paint(str).to_string()
 }
 
-pub fn format_url(template: &str, version: &str) -> String {
+fn format_url(template: &str, version: &str) -> String {
     let format_args: HashMap<String, &str> = [(String::from("version"), version)]
         .iter()
         .cloned()
