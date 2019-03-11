@@ -167,17 +167,17 @@ fn main() -> io::Result<()> {
         )
     });
 
-    if home_page_group.len() > 0 {
+    if !home_page_group.is_empty() {
         println!("");
         println!("{}", section_header(margin_width, "Homepages"));
         home_page_outputs.iter().for_each(|s| print!("{}", s));
     }
-    if template_group.len() > 0 {
+    if !template_group.is_empty() {
         println!("");
         println!("{}", section_header(margin_width, "Release Notes"));
         template_outputs.iter().for_each(|s| print!("{}", s));
     }
-    if mono_page_group.len() > 0 {
+    if !mono_page_group.is_empty() {
         mono_page_outputs.for_each(|s| print!("{}", s));
     }
 
