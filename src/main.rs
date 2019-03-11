@@ -1,5 +1,5 @@
 use ansi_term::Style;
-//use clap::{App, Arg};
+use clap::{App, Arg};
 use lazy_static::lazy_static;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -67,12 +67,31 @@ struct Package {
 }
 
 fn main() -> io::Result<()> {
+    let exe_name = std::env::current_exe()?
+        .file_name()
+        .unwrap()
+        .to_owned()
+        .into_string()
+        .unwrap();
+    let matches = App::new(exe_name)
+        .author("Ratan Rai Sur <ratan.r.sur@gmail.com>")
+        .about("What's new?")
+        .arg(
+            Arg::with_name("since")
+                .long("since")
+                .value_name("'YYYY-MM-DD HH:MM'")
+                .help("The date from which to show updates")
+                .takes_value(true),
+        )
+        .get_matches();
     let date_format = "%Y-%m-%d %H:%M";
     let mut cache_file = dirs::home_dir().unwrap();
     cache_file.push(".cache");
     cache_file.push("briefing");
     let last_briefing_time = NaiveDateTime::parse_from_str(
-        &fs::read_to_string(&cache_file).unwrap_or(String::from("2002-03-11 00:00")),
+        matches.value_of("since").unwrap_or(
+            &fs::read_to_string(&cache_file).unwrap_or(String::from("2002-03-11 00:00")),
+        ),
         date_format,
     )
     .unwrap();
