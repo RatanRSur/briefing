@@ -73,7 +73,7 @@ fn main() -> io::Result<()> {
         .to_owned()
         .into_string()
         .unwrap();
-    let matches = App::new(exe_name)
+    let matches = App::new(exe_name.clone())
         .author("Ratan Rai Sur <ratan.r.sur@gmail.com>")
         .about("What's new?")
         .arg(
@@ -87,7 +87,7 @@ fn main() -> io::Result<()> {
     let date_format = "%Y-%m-%d %H:%M";
     let mut cache_file = dirs::home_dir().unwrap();
     cache_file.push(".cache");
-    cache_file.push("briefing");
+    cache_file.push(exe_name);
     let last_briefing_time = NaiveDateTime::parse_from_str(
         matches.value_of("since").unwrap_or(
             &fs::read_to_string(&cache_file).unwrap_or(String::from("2002-03-11 00:00")),
