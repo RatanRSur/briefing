@@ -42,12 +42,12 @@ impl FromStr for Upgrade {
 
     fn from_str(s: &str) -> Result<Upgrade, Self::Err> {
         lazy_static! {
-            static ref upgrade_parse_regex: Regex = Regex::new(
+            static ref UPGRADE_PARSE_REGEX: Regex = Regex::new(
                 r"^\[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded (?P<name>[^ ]*) \((\d:)?(?P<old>[^-+]+).* -> (\d:)?(?P<new>[^-+]+).*\)$",)
                 .unwrap();
         }
 
-        let maybe_line_captures = upgrade_parse_regex.captures(s);
+        let maybe_line_captures = UPGRADE_PARSE_REGEX.captures(s);
         maybe_line_captures
             .map(|caps| Upgrade {
                 timestamp: NaiveDateTime::parse_from_str(&caps["timestamp"], "%Y-%m-%d %H:%M")
