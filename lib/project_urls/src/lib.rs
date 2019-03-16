@@ -20,6 +20,8 @@ lazy_static! {
             "git",
             "https://raw.githubusercontent.com/git/git/master/Documentation/RelNotes/{version}.txt",
         ),
+        ("ghc", "https://downloads.haskell.org/~ghc/{version}/docs/html/users_guide/{version}-notes.html"),
+        ("go", "https://golang.org/doc/devel/release.html#go{version}"),
         (
             "linux",
             "https://cdn.kernel.org/pub/linux/kernel/v4.x/ChangeLog-{version}",
@@ -46,7 +48,8 @@ lazy_static! {
     .cloned()
     .collect();
     pub static ref MONO_PAGES: HashMap<&'static str, &'static str> =
-        [("virtualbox", "https://www.virtualbox.org/wiki/Changelog")]
+        [("virtualbox", "https://www.virtualbox.org/wiki/Changelog"),
+         ("vlc", "https://www.videolan.org/developers/vlc-branch/NEWS")]
             .iter()
             .cloned()
             .collect();
