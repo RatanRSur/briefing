@@ -151,6 +151,7 @@ fn main() -> io::Result<()> {
                     .map(|upgrade| {
                         format_url(
                             project_urls::TEMPLATES.get(package.name.as_str()).unwrap(),
+                            &upgrade.old_version,
                             &upgrade.new_version,
                         )
                     })
@@ -225,11 +226,14 @@ fn bold(str: String) -> String {
     Style::new().bold().paint(str).to_string()
 }
 
-fn format_url(template: &str, version: &str) -> String {
-    let format_args: HashMap<String, &str> = [(String::from("version"), version)]
-        .iter()
-        .cloned()
-        .collect();
+fn format_url(template: &str, old_version: &str, new_version: &str) -> String {
+    let format_args: HashMap<String, &str> = [
+        ("version".to_string(), new_version),
+        ("old_version".to_string(), old_version),
+    ]
+    .iter()
+    .cloned()
+    .collect();
 
     strfmt(template, &format_args).unwrap()
 }
