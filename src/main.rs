@@ -181,11 +181,13 @@ fn main() -> io::Result<()> {
         mono_page_outputs.for_each(|s| print!("{}", s));
     }
 
-    fs::write(
-        cache_file,
-        current_briefing_time.format(date_format).to_string(),
-    )
-    .expect("Something went wrong in updating the cache file.");
+    if matches.value_of("since").is_none() {
+        fs::write(
+            cache_file,
+            current_briefing_time.format(date_format).to_string(),
+        )
+        .expect("Something went wrong in updating the cache file.");
+    }
 
     Ok(())
 }
