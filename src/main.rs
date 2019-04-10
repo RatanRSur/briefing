@@ -49,6 +49,7 @@ impl FromStr for Upgrade {
 
         let maybe_line_captures = UPGRADE_PARSE_REGEX.captures(s);
         maybe_line_captures
+            .filter(|caps| caps["old"] != caps["new"])
             .map(|caps| Upgrade {
                 timestamp: NaiveDateTime::parse_from_str(&caps["timestamp"], "%Y-%m-%d %H:%M")
                     .unwrap(),
