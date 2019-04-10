@@ -7,6 +7,7 @@ lazy_static! {
             "alacritty",
             "https://github.com/jwilm/alacritty/releases/tag/v{version}",
         ),
+        ("chromium", "https://chromium.googlesource.com/chromium/src/+log/{old_version}..{version}?pretty=fuller&n=10000"),
         ("feh", "https://feh.finalrewind.org/archive/{version}/"),
         (
             "firefox",
