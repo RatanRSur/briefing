@@ -89,7 +89,7 @@ fn main() -> io::Result<()> {
     let mut cache_file = dirs::home_dir().unwrap();
     cache_file.push(".cache");
     cache_file.push(exe_name);
-    let last_briefing_time = NaiveDateTime::parse_from_str(
+    let since_time = NaiveDateTime::parse_from_str(
         matches.value_of("since").unwrap_or(
             &fs::read_to_string(&cache_file).unwrap_or(String::from("2002-03-11 00:00")),
         ),
@@ -102,8 +102,7 @@ fn main() -> io::Result<()> {
     let upgrades_by_package: BTreeMap<Package, Vec<Upgrade>> = {
         let installed_packages_by_name = get_installed_packages_by_name();
         let mut accumulator = BTreeMap::new();
-        let upgrades_by_name =
-            get_upgrades_by_name(last_briefing_time, &installed_packages_by_name);
+        let upgrades_by_name = get_upgrades_by_name(since_time, &installed_packages_by_name);
 
         for (name, upgrades) in upgrades_by_name {
             accumulator.insert(
@@ -240,7 +239,7 @@ fn format_url(template: &str, old_version: &str, new_version: &str) -> String {
 }
 
 fn get_upgrades_by_name(
-    last_briefing_time: NaiveDateTime,
+    since_time: NaiveDateTime,
     installed_packages_by_name: &HashMap<String, Package>,
 ) -> HashMap<String, Vec<Upgrade>> {
     let f = BufReader::new(File::open("/var/log/pacman.log").unwrap());
@@ -249,7 +248,7 @@ fn get_upgrades_by_name(
     let upgrades = f
         .lines()
         .filter_map(|result_str| result_str.ok().and_then(|s| Upgrade::from_str(&s).ok()))
-        .skip_while(|upgrade| upgrade.timestamp < last_briefing_time)
+        .skip_while(|upgrade| upgrade.timestamp < since_time)
         .filter(|upgrade| installed_packages_by_name.contains_key(&upgrade.package_name));
 
     for upgrade in upgrades {
