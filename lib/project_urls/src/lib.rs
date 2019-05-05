@@ -22,7 +22,9 @@ lazy_static! {
             "https://raw.githubusercontent.com/git/git/master/Documentation/RelNotes/{version}.txt",
         ),
         ("ghc", "https://downloads.haskell.org/~ghc/{version}/docs/html/users_guide/{version}-notes.html"),
+        ("gimp", "https://www.gimp.org/release-notes/gimp-{version}.html"),
         ("go", "https://golang.org/doc/devel/release.html#go{version}"),
+        ("googler", "https://github.com/jarun/googler/releases/tag/v{version}"),
         (
             "linux",
             "https://cdn.kernel.org/pub/linux/kernel/v4.x/ChangeLog-{version}",
@@ -49,7 +51,9 @@ lazy_static! {
     .cloned()
     .collect();
     pub static ref MONO_PAGES: HashMap<&'static str, &'static str> =
-        [("virtualbox", "https://www.virtualbox.org/wiki/Changelog"),
+        [("arduino", "https://www.arduino.cc/en/Main/ReleaseNotes"),
+         ("intellij-idea-community-edition", "https://www.jetbrains.com/idea/whatsnew/"),
+         ("virtualbox", "https://www.virtualbox.org/wiki/Changelog"),
          ("vlc", "https://www.videolan.org/developers/vlc-branch/NEWS")]
             .iter()
             .cloned()
