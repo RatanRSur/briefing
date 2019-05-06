@@ -99,20 +99,7 @@ fn main() -> io::Result<()> {
 
     let current_briefing_time = chrono::offset::Local::now().naive_local();
 
-    let upgrades_by_package: BTreeMap<Package, Vec<Upgrade>> = {
-        let installed_packages_by_name = get_installed_packages_by_name();
-        let mut accumulator = BTreeMap::new();
-        let upgrades_by_name = get_upgrades_by_name(since_time, &installed_packages_by_name);
-
-        for (name, upgrades) in upgrades_by_name {
-            accumulator.insert(
-                installed_packages_by_name.get(&name).unwrap().to_owned(),
-                upgrades,
-            );
-        }
-
-        accumulator
-    };
+    let upgrades_by_package = get_upgrades_since(since_time);
 
     let margin_width = upgrades_by_package
         .keys()
@@ -195,6 +182,21 @@ fn main() -> io::Result<()> {
     }
 
     Ok(())
+}
+
+fn get_upgrades_since(since_time: NaiveDateTime) -> BTreeMap<Package, Vec<Upgrade>> {
+    let installed_packages_by_name = get_installed_packages_by_name();
+    let mut accumulator = BTreeMap::new();
+    let upgrades_by_name = get_upgrades_by_name(since_time, &installed_packages_by_name);
+
+    for (name, upgrades) in upgrades_by_name {
+        accumulator.insert(
+            installed_packages_by_name.get(&name).unwrap().to_owned(),
+            upgrades,
+        );
+    }
+
+    accumulator
 }
 
 fn get_upgrades_by_name(
