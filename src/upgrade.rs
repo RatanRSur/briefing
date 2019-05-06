@@ -97,6 +97,27 @@ fn get_upgrades_by_name(
 }
 
 fn get_installed_packages_by_name() -> HashMap<String, Package> {
+    let uname_a = String::from_utf8(
+        Command::new("/usr/bin/uname")
+            .arg("-a")
+            .output()
+            .map(|output| output.stdout)
+            .expect("Something went wrong determining the distribution (uname)"),
+    )
+    .expect("Something went wrong reading the output of uname");
+    if uname_a.contains("ARCH") {
+        // Arch linux
+        arch()
+    } else {
+        eprintln!("It looks like you're running an as yet unsupported distribution.");
+        eprintln!("It turns out adding your distribution is easy!");
+        eprintln!("https://github.com/RatanRSur/briefing/blob/master/src/upgrade.rs");
+        std::process::exit(1);
+    }
+}
+
+/// Distibution Specific Package Retrieval
+fn arch() -> HashMap<String, Package> {
     let installed_packages_output = String::from_utf8(
         Command::new("/usr/bin/pacman")
             .arg("--query")
