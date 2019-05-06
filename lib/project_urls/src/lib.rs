@@ -27,7 +27,7 @@ lazy_static! {
         ("googler", "https://github.com/jarun/googler/releases/tag/v{version}"),
         (
             "linux",
-            "https://cdn.kernel.org/pub/linux/kernel/v4.x/ChangeLog-{version}",
+            "https://cdn.kernel.org/pub/linux/kernel/v5.x/ChangeLog-{version}",
         ),
         (
             "neovim",
