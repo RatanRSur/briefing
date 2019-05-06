@@ -1,4 +1,3 @@
-use ansi_term::Style;
 use clap::{App, Arg};
 use lazy_static::lazy_static;
 use std::collections::BTreeMap;
@@ -11,12 +10,13 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader};
 use std::str::FromStr;
-use strfmt::strfmt;
 
 use std::process::Command;
 
 use chrono::naive::NaiveDateTime;
 use regex::Regex;
+
+mod formatting;
 
 #[derive(Debug)]
 struct Upgrade {
@@ -139,7 +139,7 @@ fn main() -> io::Result<()> {
     let home_page_outputs: Vec<String> = home_page_group
         .iter()
         .map(|package| (&package.name, vec![package.home_page_url.clone()]))
-        .map(|(name, urls)| package_output(margin_width, &name, &urls))
+        .map(|(name, urls)| formatting::package_output(margin_width, &name, &urls))
         .collect();
     let template_outputs: Vec<String> = template_group
         .iter()
@@ -149,7 +149,7 @@ fn main() -> io::Result<()> {
                 upgrades
                     .iter()
                     .map(|upgrade| {
-                        format_url(
+                        formatting::format_url(
                             project_urls::TEMPLATES.get(package.name.as_str()).unwrap(),
                             &upgrade.old_version,
                             &upgrade.new_version,
@@ -158,10 +158,10 @@ fn main() -> io::Result<()> {
                     .collect(),
             )
         })
-        .map(|(name, urls)| package_output(margin_width, &name, &urls))
+        .map(|(name, urls)| formatting::package_output(margin_width, &name, &urls))
         .collect();
     let mono_page_outputs = mono_page_group.iter().map(|(package, mono_page_url)| {
-        package_output(
+        formatting::package_output(
             margin_width,
             &package.name,
             &vec![String::from(**mono_page_url)],
@@ -170,12 +170,15 @@ fn main() -> io::Result<()> {
 
     if !home_page_group.is_empty() {
         println!("");
-        println!("{}", section_header(margin_width, "Homepages"));
+        println!("{}", formatting::section_header(margin_width, "Homepages"));
         home_page_outputs.iter().for_each(|s| print!("{}", s));
     }
     if !template_group.is_empty() {
         println!("");
-        println!("{}", section_header(margin_width, "Release Notes"));
+        println!(
+            "{}",
+            formatting::section_header(margin_width, "Release Notes")
+        );
         template_outputs.iter().for_each(|s| print!("{}", s));
     }
     if !mono_page_group.is_empty() {
@@ -192,51 +195,6 @@ fn main() -> io::Result<()> {
     }
 
     Ok(())
-}
-
-fn section_header(margin_width: usize, header: &str) -> String {
-    let mut buf = String::new();
-    buf.push_str(&left_pad_to_width(margin_width, ""));
-    buf.push(' ');
-    buf.push_str(header);
-    bold(buf)
-}
-
-fn package_output(margin_width: usize, package_name: &str, urls: &Vec<String>) -> String {
-    let mut buf = String::new();
-    buf.push_str(&bold(left_pad_to_width(margin_width, package_name)));
-    for (i, url) in urls.iter().enumerate() {
-        if i != 0 {
-            buf.push_str(&left_pad_to_width(margin_width, ""));
-        }
-        buf.push(' ');
-        buf.push_str(url);
-        buf.push('\n');
-    }
-    buf
-}
-
-fn left_pad_to_width(width: usize, str: &str) -> String {
-    let mut buf = String::new();
-    (0..(width - str.len())).for_each(|_| buf.push(' '));
-    buf.push_str(str);
-    buf
-}
-
-fn bold(str: String) -> String {
-    Style::new().bold().paint(str).to_string()
-}
-
-fn format_url(template: &str, old_version: &str, new_version: &str) -> String {
-    let format_args: HashMap<String, &str> = [
-        ("version".to_string(), new_version),
-        ("old_version".to_string(), old_version),
-    ]
-    .iter()
-    .cloned()
-    .collect();
-
-    strfmt(template, &format_args).unwrap()
 }
 
 fn get_upgrades_by_name(
