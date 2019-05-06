@@ -1,3 +1,4 @@
+use crate::distribution::Distribution;
 use regex::Regex;
 use std::collections::HashMap;
 use std::process::Command;
@@ -8,23 +9,9 @@ pub struct Package {
     pub home_page_url: String,
 }
 
-pub fn get_installed_packages_by_name() -> HashMap<String, Package> {
-    let uname_a = String::from_utf8(
-        Command::new("/usr/bin/uname")
-            .arg("-a")
-            .output()
-            .map(|output| output.stdout)
-            .expect("Something went wrong determining the distribution (uname)"),
-    )
-    .expect("Something went wrong reading the output of uname");
-    if uname_a.contains("ARCH") {
-        // Arch linux
-        arch()
-    } else {
-        eprintln!("It looks like you're running an as yet unsupported distribution.");
-        eprintln!("It turns out adding your distribution is easy!");
-        eprintln!("https://github.com/RatanRSur/briefing/blob/master/src/package.rs");
-        std::process::exit(1);
+pub fn get_installed_packages_by_name(distro: Distribution) -> HashMap<String, Package> {
+    match distro {
+        Arch => arch(),
     }
 }
 

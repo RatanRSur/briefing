@@ -12,6 +12,7 @@ use chrono::naive::NaiveDateTime;
 use regex::Regex;
 use std::io::prelude::*;
 
+use crate::distribution::Distribution;
 use crate::package::{get_installed_packages_by_name, Package};
 
 #[derive(Debug)]
@@ -57,8 +58,11 @@ impl FromStr for Upgrade {
     }
 }
 
-pub fn get_upgrades_since(since_time: NaiveDateTime) -> BTreeMap<Package, Vec<Upgrade>> {
-    let installed_packages_by_name = get_installed_packages_by_name();
+pub fn get_upgrades_since(
+    since_time: NaiveDateTime,
+    distro: Distribution,
+) -> BTreeMap<Package, Vec<Upgrade>> {
+    let installed_packages_by_name = get_installed_packages_by_name(distro);
     let mut accumulator = BTreeMap::new();
     let upgrades_by_name = get_upgrades_by_name(since_time, &installed_packages_by_name);
 
