@@ -182,7 +182,8 @@ fn main() -> io::Result<()> {
         mono_page_outputs.for_each(|s| print!("{}", s));
     }
 
-    if matches.value_of("since").is_none() {
+    // don't write to cache file if since is used
+    if !matches.is_present("since") {
         fs::write(
             cache_file,
             current_briefing_time.format(date_format).to_string(),
