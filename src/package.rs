@@ -1,4 +1,5 @@
-use crate::distribution::Distribution;
+use crate::distribution;
+use crate::distribution::Distribution::*;
 use regex::Regex;
 use std::collections::HashMap;
 use std::process::Command;
@@ -9,8 +10,8 @@ pub struct Package {
     pub home_page_url: String,
 }
 
-pub fn get_installed_packages_by_name(distro: Distribution) -> HashMap<String, Package> {
-    match distro {
+pub fn get_installed_packages_by_name() -> HashMap<String, Package> {
+    match distribution::current() {
         Arch => arch(),
     }
 }

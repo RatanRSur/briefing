@@ -41,7 +41,7 @@ fn main() -> io::Result<()> {
 
     let current_briefing_time = chrono::offset::Local::now().naive_local();
 
-    let upgrades_by_package = upgrade::get_upgrades_since(since_time, distribution::current());
+    let upgrades_by_package = upgrade::get_upgrades_since(since_time);
 
     let margin_width = upgrades_by_package
         .keys()
