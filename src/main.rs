@@ -97,12 +97,12 @@ fn main() -> io::Result<()> {
         )
     });
 
-    if !home_page_group.is_empty() {
+    if !home_page_outputs.is_empty() {
         println!("");
         println!("{}", formatting::section_header(margin_width, "Homepages"));
         home_page_outputs.iter().for_each(|s| print!("{}", s));
     }
-    if !template_group.is_empty() {
+    if !template_outputs.is_empty() {
         println!("");
         println!(
             "{}",
@@ -110,9 +110,7 @@ fn main() -> io::Result<()> {
         );
         template_outputs.iter().for_each(|s| print!("{}", s));
     }
-    if !mono_page_group.is_empty() {
-        mono_page_outputs.for_each(|s| print!("{}", s));
-    }
+    mono_page_outputs.for_each(|s| print!("{}", s));
 
     // don't write to cache file if since is used
     if !matches.is_present("since") {
