@@ -19,13 +19,17 @@ fn main() -> io::Result<()> {
     let matches = App::new(exe_name.clone())
         .author("Ratan Rai Sur <ratan.r.sur@gmail.com>")
         .about("What's new?")
-        .arg(
+        .args(&[
             Arg::with_name("since")
                 .long("since")
                 .value_name("'YYYY-MM-DD HH:MM'")
                 .help("The date from which to show updates")
                 .takes_value(true),
-        )
+            Arg::with_name("no-cache")
+                .long("no-cache")
+                .help("Don't update the cache file to record the time of this run")
+                .takes_value(false),
+        ])
         .get_matches();
     let date_format = "%Y-%m-%d %H:%M";
     let mut cache_file = dirs::home_dir().unwrap();
@@ -113,7 +117,8 @@ fn main() -> io::Result<()> {
     mono_page_outputs.for_each(|s| print!("{}", s));
 
     // don't write to cache file if since is used
-    if !matches.is_present("since") {
+    let write_to_cache = !(matches.is_present("since") || matches.is_present("no-cache"));
+    if write_to_cache {
         fs::write(
             cache_file,
             current_briefing_time.format(date_format).to_string(),
