@@ -17,11 +17,11 @@ lazy_static! {
             "flatpak",
             "https://github.com/flatpak/flatpak/releases/tag/{version}",
         ),
+        ("ghc", "https://downloads.haskell.org/~ghc/{version}/docs/html/users_guide/{version}-notes.html"),
         (
             "git",
             "https://raw.githubusercontent.com/git/git/master/Documentation/RelNotes/{version}.txt",
         ),
-        ("ghc", "https://downloads.haskell.org/~ghc/{version}/docs/html/users_guide/{version}-notes.html"),
         ("gimp", "https://www.gimp.org/release-notes/gimp-{version}.html"),
         ("go", "https://golang.org/doc/devel/release.html#go{version}"),
         ("googler", "https://github.com/jarun/googler/releases/tag/v{version}"),
@@ -39,12 +39,12 @@ lazy_static! {
         ),
         ("vim", "https://github.com/vim/vim/releases/tag/v{version}"),
         (
-            "youtube-dl",
-            "https://github.com/rg3/youtube-dl/releases/tag/{version}",
-        ),
-        (
             "yay",
             "https://github.com/Jguer/yay/releases/tag/v{version}"
+        ),
+        (
+            "youtube-dl",
+            "https://github.com/rg3/youtube-dl/releases/tag/{version}",
         ),
     ]
     .iter()
