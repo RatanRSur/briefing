@@ -77,15 +77,13 @@ fn get_upgrades_by_name(
     since_time: NaiveDateTime,
     installed_packages_by_name: &HashMap<String, Package>,
 ) -> HashMap<String, Vec<Upgrade>> {
-    let f = BufReader::new(File::open("/var/log/pacman.log").unwrap());
-
-    let mut accumulator = HashMap::new();
-    let upgrades = f
+    let upgrades = BufReader::new(File::open("/var/log/pacman.log").unwrap())
         .lines()
         .filter_map(|result_str| result_str.ok().and_then(|s| Upgrade::from_str(&s).ok()))
         .skip_while(|upgrade| upgrade.timestamp < since_time)
         .filter(|upgrade| installed_packages_by_name.contains_key(&upgrade.package_name));
 
+    let mut accumulator = HashMap::new();
     for upgrade in upgrades {
         let vec = accumulator
             .entry(upgrade.package_name.clone())
