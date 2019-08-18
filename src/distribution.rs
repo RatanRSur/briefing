@@ -8,7 +8,7 @@ pub enum Distribution {
 
 pub fn current() -> Distribution {
     let uname_a = String::from_utf8(
-        Command::new("/usr/bin/uname")
+        Command::new("uname")
             .arg("-a")
             .output()
             .map(|output| output.stdout)
