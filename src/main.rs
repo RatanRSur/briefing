@@ -102,12 +102,12 @@ fn main() -> io::Result<()> {
     });
 
     if !home_page_outputs.is_empty() {
-        println!("");
+        println!();
         println!("{}", formatting::section_header(margin_width, "Homepages"));
         home_page_outputs.iter().for_each(|s| print!("{}", s));
     }
     if !template_outputs.is_empty() {
-        println!("");
+        println!();
         println!(
             "{}",
             formatting::section_header(margin_width, "Release Notes")
