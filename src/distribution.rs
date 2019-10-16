@@ -20,7 +20,7 @@ pub fn current() -> Distribution {
     } else {
         eprintln!("It looks like you're running an as yet unsupported distribution.");
         eprintln!("It turns out adding your distribution is easy!");
-        eprintln!("https://github.com/RatanRSur/briefing/blob/master/src/package.rs");
+        eprintln!("https://github.com/RatanRSur/briefing");
         std::process::exit(1);
     }
 }
