@@ -2,6 +2,7 @@ use lazy_static::lazy_static;
 use std::collections::HashMap;
 
 lazy_static! {
+    /// URL's for projects who have version specific changelog URL's
     pub static ref TEMPLATES: HashMap<&'static str, &'static str> = [
         ("alacritty", "https://github.com/jwilm/alacritty/releases/tag/v{version}",),
         ("chromium", "https://chromium.googlesource.com/chromium/src/+log/{old_version}..{version}?pretty=fuller&n=10000"),
@@ -25,6 +26,7 @@ lazy_static! {
     .iter()
     .cloned()
     .collect();
+    /// URL's for projects who have a single page with updated changelogs
     pub static ref MONO_PAGES: HashMap<&'static str, &'static str> =
         [("arduino", "https://www.arduino.cc/en/Main/ReleaseNotes"),
          ("google-chrome", "https://chromereleases.googleblog.com"),
