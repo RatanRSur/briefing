@@ -13,6 +13,8 @@ use regex::Regex;
 use std::io::prelude::*;
 
 use crate::package::{get_installed_packages_by_name, Package};
+use crate::distribution;
+use crate::distribution::Distribution::*;
 
 #[derive(Debug)]
 pub struct Upgrade {
@@ -74,6 +76,16 @@ pub fn get_upgrades_since(since_time: NaiveDateTime) -> BTreeMap<Package, Vec<Up
 }
 
 fn get_upgrades_by_name(
+    since_time: NaiveDateTime,
+    installed_packages_by_name: &HashMap<String, Package>,
+) -> HashMap<String, Vec<Upgrade>> {
+    match distribution::current() {
+        Arch => arch(since_time, installed_packages_by_name),
+    }
+}
+
+/// Arch Linux
+fn arch(
     since_time: NaiveDateTime,
     installed_packages_by_name: &HashMap<String, Package>,
 ) -> HashMap<String, Vec<Upgrade>> {
