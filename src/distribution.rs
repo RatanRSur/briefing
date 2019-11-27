@@ -14,8 +14,9 @@ pub fn current() -> Distribution {
             .map(|output| output.stdout)
             .expect("Something went wrong determining the distribution (uname)"),
     )
-    .expect("Something went wrong reading the output of uname");
-    if uname_a.contains("ARCH") {
+    .expect("Something went wrong reading the output of uname")
+    .to_lowercase();
+    if uname_a.contains("arch") {
         Arch
     } else {
         eprintln!("It looks like you're running an as yet unsupported distribution.");
