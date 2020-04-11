@@ -12,9 +12,9 @@ use chrono::naive::NaiveDateTime;
 use regex::Regex;
 use std::io::prelude::*;
 
-use crate::package::{get_installed_packages_by_name, Package};
 use crate::distribution;
 use crate::distribution::Distribution::*;
+use crate::package::{get_installed_packages_by_name, Package};
 
 #[derive(Debug)]
 pub struct Upgrade {
@@ -41,7 +41,7 @@ impl FromStr for Upgrade {
     fn from_str(s: &str) -> Result<Upgrade, Self::Err> {
         lazy_static! {
             static ref UPGRADE_PARSE_REGEX: Regex = Regex::new(
-                r"^\[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] \[ALPM\] upgraded (?P<name>[^ ]*) \((\d:)?(?P<old>[^-+]+).* -> (\d:)?(?P<new>[^-+]+).*\)$",)
+                r"^\[(?P<date>\d{4}-\d{2}-\d{2})( |T)(?P<time>\d{2}:\d{2})(:\d\d-\d\d\d\d)?\] \[ALPM\] upgraded (?P<name>[^ ]*) \((\d:)?(?P<old>[^-+]+).* -> (\d:)?(?P<new>[^-+]+).*\)$",)
                 .unwrap();
         }
 
@@ -50,8 +50,11 @@ impl FromStr for Upgrade {
             // prevent duplicates from package updates causing duplicates
             .filter(|caps| caps["old"] != caps["new"])
             .map(|caps| Upgrade {
-                timestamp: NaiveDateTime::parse_from_str(&caps["timestamp"], "%Y-%m-%d %H:%M")
-                    .unwrap(),
+                timestamp: NaiveDateTime::parse_from_str(
+                    &format!("{} {}", &caps["date"], &caps["time"]),
+                    "%Y-%m-%d %H:%M",
+                )
+                .unwrap(),
                 package_name: caps["name"].to_string(),
                 old_version: caps["old"].to_string(),
                 new_version: caps["new"].to_string(),
