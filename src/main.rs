@@ -3,7 +3,8 @@ use std::fs;
 use std::io;
 use std::process::exit;
 
-use chrono::naive::NaiveDateTime;
+use chrono::naive::NaiveDate;
+use chrono::naive::NaiveTime;
 
 mod distribution;
 mod formatting;
@@ -17,14 +18,14 @@ fn main() -> io::Result<()> {
         .to_owned()
         .into_string()
         .unwrap();
-    let date_format_cmd = "YYYY-MM-DD HH:MM";
+    let date_cmdline_format = "YYYY-MM-DD";
     let matches = App::new(exe_name.clone())
         .author("Ratan Rai Sur <ratan.r.sur@gmail.com>")
         .about("What's new?")
         .args(&[
             Arg::with_name("since")
                 .long("since")
-                .value_name(&date_format_cmd)
+                .value_name(&date_cmdline_format)
                 .help("The date from which to show updates")
                 .takes_value(true),
             Arg::with_name("no-cache")
@@ -33,22 +34,23 @@ fn main() -> io::Result<()> {
                 .takes_value(false),
         ])
         .get_matches();
-    let date_format = "%Y-%m-%d %H:%M";
+    let naive_date_format = "%F";
     let mut cache_file = dirs::home_dir().unwrap();
     cache_file.push(".cache");
     cache_file.push(exe_name);
-    let since_time = NaiveDateTime::parse_from_str(
-        matches.value_of("since").unwrap_or(
-            &fs::read_to_string(&cache_file).unwrap_or(String::from("2002-03-11 00:00")),
-        ),
-        date_format,
+    let since_time = NaiveDate::parse_from_str(
+        matches
+            .value_of("since")
+            .unwrap_or(&fs::read_to_string(&cache_file).unwrap_or(String::from("2002-03-11"))),
+        naive_date_format,
     )
     .unwrap_or_else(|_| {
-        println!("Invalid date format. Use {}", date_format_cmd);
+        println!("Invalid date format. Use {}", date_cmdline_format);
         exit(1)
-    });
+    })
+    .and_time(NaiveTime::from_num_seconds_from_midnight(0, 0));
 
-    let current_briefing_time = chrono::offset::Local::now().naive_local();
+    let current_briefing_time = chrono::offset::Local::today();
 
     let upgrades_by_package = upgrade::get_upgrades_since(since_time);
 
@@ -126,7 +128,7 @@ fn main() -> io::Result<()> {
     if write_to_cache {
         fs::write(
             cache_file,
-            current_briefing_time.format(date_format).to_string(),
+            current_briefing_time.format(naive_date_format).to_string(),
         )
         .expect("Something went wrong in updating the cache file.");
     }
