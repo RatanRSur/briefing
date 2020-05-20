@@ -1,6 +1,7 @@
 use clap::{App, Arg};
 use std::fs;
 use std::io;
+use std::process::exit;
 
 use chrono::naive::NaiveDateTime;
 
@@ -16,13 +17,14 @@ fn main() -> io::Result<()> {
         .to_owned()
         .into_string()
         .unwrap();
+    let date_format_cmd = "YYYY-MM-DD HH:MM";
     let matches = App::new(exe_name.clone())
         .author("Ratan Rai Sur <ratan.r.sur@gmail.com>")
         .about("What's new?")
         .args(&[
             Arg::with_name("since")
                 .long("since")
-                .value_name("'YYYY-MM-DD HH:MM'")
+                .value_name(&date_format_cmd)
                 .help("The date from which to show updates")
                 .takes_value(true),
             Arg::with_name("no-cache")
@@ -41,7 +43,10 @@ fn main() -> io::Result<()> {
         ),
         date_format,
     )
-    .unwrap();
+    .unwrap_or_else(|_| {
+        println!("Invalid date format. Use {}", date_format_cmd);
+        exit(1)
+    });
 
     let current_briefing_time = chrono::offset::Local::now().naive_local();
 
