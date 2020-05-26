@@ -3,8 +3,7 @@ use std::fs;
 use std::io;
 use std::process::exit;
 
-use chrono::naive::NaiveDate;
-use chrono::naive::NaiveTime;
+use chrono::NaiveDate;
 
 mod distribution;
 mod formatting;
@@ -47,8 +46,7 @@ fn main() -> io::Result<()> {
     .unwrap_or_else(|_| {
         println!("Invalid date format. Use {}", date_cmdline_format);
         exit(1)
-    })
-    .and_time(NaiveTime::from_num_seconds_from_midnight(0, 0));
+    });
 
     let current_briefing_time = chrono::offset::Local::today();
 
