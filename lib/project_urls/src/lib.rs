@@ -1,27 +1,44 @@
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
+macro_rules! github_releases {
+    ($organization:literal, $project:literal, $version_prefix:literal) => {
+        (
+            $project,
+            concat!(
+                "https://github.com/",
+                $organization,
+                "/",
+                $project,
+                "/releases/tag/",
+                $version_prefix,
+                "{version}"
+            ),
+        )
+    };
+}
+
 lazy_static! {
     /// URL's for projects who have version specific changelog URL's
     pub static ref TEMPLATES: HashMap<&'static str, &'static str> = [
-        ("alacritty", "https://github.com/jwilm/alacritty/releases/tag/v{version}",),
+        github_releases!("jwilm", "alacritty", "v"),
         ("chromium", "https://chromium.googlesource.com/chromium/src/+log/{old_version}..{version}?pretty=fuller&n=10000"),
         ("feh", "https://feh.finalrewind.org/archive/{version}/"),
         ("firefox", "https://www.mozilla.org/en-US/firefox/{version}/releasenotes/",),
-        ("flatpak", "https://github.com/flatpak/flatpak/releases/tag/{version}",),
+        github_releases!("flatpak", "flatpak", ""),
         ("ghc", "https://downloads.haskell.org/~ghc/{version}/docs/html/users_guide/{version}-notes.html"),
         ("git", "https://raw.githubusercontent.com/git/git/master/Documentation/RelNotes/{version}.txt",),
         ("gimp", "https://www.gimp.org/release-notes/gimp-{version}.html"),
         ("go", "https://golang.org/doc/devel/release.html#go{version}"),
-        ("googler", "https://github.com/jarun/googler/releases/tag/v{version}"),
+        github_releases!("jarun", "googler", ""),
         ("i3-gaps", "https://github.com/Airblader/i3/blob/gaps-next/RELEASE-NOTES-{version}"),
         ("linux", "https://cdn.kernel.org/pub/linux/kernel/v5.x/ChangeLog-{version}",),
-        ("neovim", "https://github.com/neovim/neovim/releases/tag/v{version}",),
+        github_releases!("neovim", "neovim", "v"),
         ("racket", "https://download.racket-lang.org/v{version}.html"),
         ("tmux", "https://raw.githubusercontent.com/tmux/tmux/{version}/CHANGES"),
-        ("vim", "https://github.com/vim/vim/releases/tag/v{version}"),
-        ("yay", "https://github.com/Jguer/yay/releases/tag/v{version}"),
-        ("youtube-dl", "https://github.com/rg3/youtube-dl/releases/tag/{version}",),
+        github_releases!("vim", "vim", "v"),
+        github_releases!("Jguer", "yay", "v"),
+        github_releases!("rg3", "youtube-dl", ""),
     ]
     .iter()
     .cloned()
