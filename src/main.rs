@@ -5,6 +5,7 @@ use std::process::exit;
 
 use chrono::NaiveDate;
 
+mod date_utils;
 mod distribution;
 mod formatting;
 mod package;
@@ -33,7 +34,6 @@ fn main() -> io::Result<()> {
                 .takes_value(false),
         ])
         .get_matches();
-    let naive_date_format = "%F";
     let mut cache_file = dirs::home_dir().unwrap();
     cache_file.push(".cache");
     cache_file.push(exe_name);
@@ -43,10 +43,12 @@ fn main() -> io::Result<()> {
         .map(|s| String::from(s))
         .or(fs::read_to_string(&cache_file).ok())
         .map(|date_string| {
-            NaiveDate::parse_from_str(&date_string, naive_date_format).unwrap_or_else(|_| {
-                println!("Invalid date format. Use {}", date_cmdline_format);
-                exit(1)
-            })
+            NaiveDate::parse_from_str(&date_string, date_utils::NAIVE_DATE_FORMAT).unwrap_or_else(
+                |_| {
+                    println!("Invalid date format. Use {}", date_cmdline_format);
+                    exit(1)
+                },
+            )
         })
         .unwrap_or(current_briefing_time);
 
@@ -126,7 +128,9 @@ fn main() -> io::Result<()> {
     if write_to_cache {
         fs::write(
             cache_file,
-            current_briefing_time.format(naive_date_format).to_string(),
+            current_briefing_time
+                .format(date_utils::NAIVE_DATE_FORMAT)
+                .to_string(),
         )
         .expect("Something went wrong in updating the cache file.");
     }

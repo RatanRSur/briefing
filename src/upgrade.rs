@@ -12,6 +12,7 @@ use std::str::FromStr;
 use regex::Regex;
 use std::io::prelude::*;
 
+use crate::date_utils;
 use crate::distribution;
 use crate::distribution::Distribution::*;
 use crate::package::{get_installed_packages_by_name, Package};
@@ -50,7 +51,8 @@ impl FromStr for Upgrade {
             // prevent duplicates from package updates causing duplicates
             .filter(|caps| caps["old"] != caps["new"])
             .map(|caps| Upgrade {
-                date: NaiveDate::parse_from_str(&caps["date"], "%Y-%m-%d").unwrap(),
+                date: NaiveDate::parse_from_str(&caps["date"], date_utils::NAIVE_DATE_FORMAT)
+                    .unwrap(),
                 package_name: caps["name"].to_string(),
                 old_version: caps["old"].to_string(),
                 new_version: caps["new"].to_string(),
