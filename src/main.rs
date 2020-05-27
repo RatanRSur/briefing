@@ -37,18 +37,18 @@ fn main() -> io::Result<()> {
     let mut cache_file = dirs::home_dir().unwrap();
     cache_file.push(".cache");
     cache_file.push(exe_name);
-    let since_time = NaiveDate::parse_from_str(
-        matches
-            .value_of("since")
-            .unwrap_or(&fs::read_to_string(&cache_file).unwrap_or(String::from("2002-03-11"))),
-        naive_date_format,
-    )
-    .unwrap_or_else(|_| {
-        println!("Invalid date format. Use {}", date_cmdline_format);
-        exit(1)
-    });
-
-    let current_briefing_time = chrono::offset::Local::today();
+    let current_briefing_time = chrono::Local::today().naive_local();
+    let since_time = matches
+        .value_of("since")
+        .map(|s| String::from(s))
+        .or(fs::read_to_string(&cache_file).ok())
+        .map(|date_string| {
+            NaiveDate::parse_from_str(&date_string, naive_date_format).unwrap_or_else(|_| {
+                println!("Invalid date format. Use {}", date_cmdline_format);
+                exit(1)
+            })
+        })
+        .unwrap_or(current_briefing_time);
 
     let upgrades_by_package = upgrade::get_upgrades_since(since_time);
 
