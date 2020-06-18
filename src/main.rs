@@ -122,6 +122,7 @@ fn main() -> io::Result<()> {
         template_outputs.iter().for_each(|s| print!("{}", s));
     }
     mono_page_outputs.for_each(|s| print!("{}", s));
+    println!();
 
     // don't write to cache file if since is used
     let write_to_cache = !(matches.is_present("since") || matches.is_present("no-cache"));
