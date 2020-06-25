@@ -17,7 +17,7 @@ use crate::distribution;
 use crate::distribution::Distribution::*;
 use crate::package::{get_installed_packages_by_name, Package};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Upgrade {
     pub date: NaiveDate,
     pub package_name: String,
@@ -42,7 +42,7 @@ impl FromStr for Upgrade {
     fn from_str(s: &str) -> Result<Upgrade, Self::Err> {
         lazy_static! {
             static ref UPGRADE_PARSE_REGEX: Regex = Regex::new(
-                r"^\[(?P<date>\d{4}-\d{2}-\d{2})( |T)\d{2}:\d{2}(:\d\d-\d\d\d\d)?\] \[ALPM\] upgraded (?P<name>[^ ]*) \((\d:)?(?P<old>[^-+]+).* -> (\d:)?(?P<new>[^-+]+).*\)$")
+                r"^\[(?P<date>\d{4}-\d{2}-\d{2})( |T)\d{2}:\d{2}(:\d\d-\d\d\d\d)?\] \[ALPM\] upgraded (?P<name>[^ ]*) \((\d:)?(?P<old>[.\d]+\d).* -> (\d:)?(?P<new>[.\d]+\d).*\)$")
                 .unwrap();
         }
 
@@ -105,4 +105,41 @@ fn arch(
     }
 
     accumulator
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_linux_old_format() {
+        assert_eq!(
+            Upgrade::from_str(
+                "[2019-08-18 14:59] [ALPM] upgraded linux (5.2.8.arch1-1 -> 5.2.9.arch1-1)"
+            )
+            .unwrap(),
+            Upgrade {
+                date: NaiveDate::from_ymd(2019, 08, 18),
+                package_name: "linux".to_string(),
+                old_version: "5.2.8".to_string(),
+                new_version: "5.2.9".to_string()
+            }
+        )
+    }
+
+    #[test]
+    fn parse_new_alpm_format() {
+        assert_eq!(
+            Upgrade::from_str(
+                "[2020-06-24T13:14:18-0400] [ALPM] upgraded linux (5.7.4.arch1-1 -> 5.7.5.arch1-1)"
+            )
+            .unwrap(),
+            Upgrade {
+                date: NaiveDate::from_ymd(2020, 06, 24),
+                package_name: "linux".to_string(),
+                old_version: "5.7.4".to_string(),
+                new_version: "5.7.5".to_string()
+            }
+        )
+    }
 }
