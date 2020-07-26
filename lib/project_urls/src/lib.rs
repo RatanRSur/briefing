@@ -22,7 +22,9 @@ lazy_static! {
     /// URL's for projects who have version specific changelog URL's
     pub static ref TEMPLATES: HashMap<&'static str, &'static str> = [
         github_releases!("jwilm", "alacritty", "v"),
+        github_releases!("hyperledger", "besu", ""),
         ("chromium", "https://chromium.googlesource.com/chromium/src/+log/{old_version}..{version}?pretty=fuller&n=10000"),
+        github_releases!("FedeDP", "Clight", "v"),
         ("feh", "https://feh.finalrewind.org/archive/{version}/"),
         ("firefox", "https://www.mozilla.org/en-US/firefox/{version}/releasenotes/"),
         github_releases!("flatpak", "flatpak", ""),
